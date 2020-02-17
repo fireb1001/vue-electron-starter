@@ -770,11 +770,10 @@ export default {
       if(calc_balance_was && calc_balance_was[0] && calc_balance_was[0].balance_was){
         this.day_balance_was = parseFloat(calc_balance_was[0].balance_was)
       }
-      let calc_debt = await knex.raw(`select sum(amount) as curr_debt from supplier_trans where supplier_id = ${this.supplier_id}`);
+      let [calc_debt] = await knex.raw(`select sum(amount) as curr_debt from supplier_trans where supplier_id = ${this.supplier_id}`);
 
-      if(calc_debt && calc_debt[0] && calc_debt[0].curr_debt ){
-        this.curr_debt = parseFloat(calc_debt[0].curr_debt)
-      }
+      this.curr_debt = parseFloat(calc_debt.curr_debt)
+      
       this.recp_1 = new ReceiptDAO({serial: 1, recp_given: this.recp_init_recp_given, comm_rate: this.recp_init_comm_rate, ...ReceiptDAO.INIT_DAO})
       this.recp_2 = new ReceiptDAO({serial: 2, comm_rate: this.recp_init_comm_rate, ...ReceiptDAO.INIT_DAO})
       this.recp_3 = new ReceiptDAO({serial: 3, comm_rate: this.recp_init_comm_rate, ...ReceiptDAO.INIT_DAO})

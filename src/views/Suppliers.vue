@@ -137,7 +137,9 @@
               <td></td>
               <th> الكود </th>
               <th>الاسم</th>
+              <th>ملاحظات</th>
               <th>رصيد</th>
+              
               <th>{{'sum_rasd' | tr_label}}</th>
               <td></td>
             </tr>
@@ -151,6 +153,7 @@
                   {{item.name}}
                 </router-link>
                </td>
+              <td>{{item.notes}}</td>
               <td>{{item.sum_debt | round | toAR}}</td>
               <td>{{item.sum_net_rasd | round | toAR}}</td>
               <td class="d-print-none">

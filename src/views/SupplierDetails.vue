@@ -14,7 +14,11 @@
           <th>عنوان العميل</th>
           <td>{{supplier.address}}</td>
         </tr>
+        <tr>
+          <th>ملاحظات</th>
+          <td>{{supplier.notes}}</td>
 
+        </tr>
       </table>
     </section>
     <section class="row">

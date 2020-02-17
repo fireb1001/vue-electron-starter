@@ -2,6 +2,9 @@
 -- F_STRICT_MODE
 
 INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+VALUES ('demo_hide', 'true', '', 'mmn1', 'config');
+
+INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('MANUAL_UPGRADED_TO', '1.44', '', 'default', 'config');
 
 update "shader_configs" set config_value='1.44' where config_name = 'MANUAL_UPGRADED_TO';
@@ -145,7 +148,7 @@ INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "s
 VALUES ('F_MMN1_PASS', '4242', '', 'mmn1', 'config');
 
 insert into daily_close ('day', 'closed') 
-select DISTINCT(day), 'true' as true from cashflow where day < '2020-02-05';
+select DISTINCT(day), 'true' as true from cashflow where day >= '2020-02-05';
 */
 
 -- 1.41

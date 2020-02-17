@@ -324,11 +324,58 @@ export default {
   mixins: [MainMixin],
   methods: {
     async refresh_all(){
+      this.supplier = await new SuppliersCtrl().findById(this.supplier_id)
+      //console.log(this.supplier)
+      if(this.app_config.shader_name == 'amn1' && this.supplier.address){
+        try {
+          if(JSON.parse(this.supplier.address) && JSON.parse(this.supplier.address).comm_rate)
+          this.recp_init_comm_rate = parseFloat(JSON.parse(this.supplier.address).comm_rate)
+          console.log(parseFloat(JSON.parse(this.supplier.address).comm_rate))
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
+      this.inc_headers = await new InoutHeadCtrl().findAll({supplier_id: this.supplier_id, day: this.recp_day})
+
+      this.total_nolon = await new CashflowCtrl().getSupplierNolons({supplier_id: this.supplier_id, day: this.recp_day})
+      // TODO ظبط
+      this.recp_expenses_dao = await new CashflowCtrl().getSupplierRecpExpenses({supplier_id: this.supplier_id, day: this.recp_day})
+      this.recp_expenses_dao = this.recp_expenses_dao ? this.recp_expenses_dao : new CashflowDAO({
+        state: 'supp_recp_expenses',
+        sum: '-',
+        amount: 0
+      })
+      this.recp_expenses = this.recp_expenses_dao.amount 
+      
+      let [receipt] = await new ReceiptsCtrl().findAll({supplier_id: this.supplier_id, day: this.recp_day})
+      
+      if(receipt) {
+        console.log(receipt)
+        this.modal_recp = receipt
+      } else {
+        console.log('np recp')
+        // if no recp_id init recp 
+        let outgoings_sums = await new OutgoingsCtrl().findSuppDaySums({supplier_id: this.supplier_id, day: this.recp_day})
+        if(outgoings_sums.length < 1) throw "No Details";
+        let new_recp = new ReceiptDAO({serial: 1, recp_given: this.recp_init_recp_given, comm_rate: this.recp_init_comm_rate, ...ReceiptDAO.INIT_DAO})
+        let all = outgoings_sums.map( dao => this.clone(dao))
+        new_recp.details = all
+        new_recp.total_nolon = this.total_nolon
+        new_recp.balance_was = this.supplier.balance
+        new_recp.recp_expenses = this.recp_expenses
+        new_recp.recp_deducts = this.recp_deducts
+        console.log(new_recp)
+        let ret_recp = await this.saveRecp(new_recp);
+        console.log(ret_recp);
+        // Save recp then get it
+        let [fresh_recp] = await new ReceiptsCtrl().findAll({supplier_id: this.supplier_id, day: this.recp_day})
+        this.modal_recp = fresh_recp
+      }
+
       let [calc_debt] = await knex.raw(`select sum(amount) as curr_debt from supplier_trans where supplier_id = ${this.supplier_id}`);
       console.log(calc_debt)
-      if( calc_debt && calc_debt.curr_debt ){
-        this.curr_debt = parseFloat(calc_debt.curr_debt)
-      }
+      this.curr_debt = parseFloat(calc_debt.curr_debt)
     },
     async saveRecp(receipt = null){
       if(! receipt) receipt = this.modal_recp
@@ -337,7 +384,9 @@ export default {
         day: this.recp_day,
         supplier_id: this.supplier_id,
       })
-      return await new ReceiptsCtrl().save(receipt)
+      await new ReceiptsCtrl().save(receipt)
+      await this.refresh_all()
+      return
     },
     async newRecpDetial(incom) {
       console.log(incom)
@@ -419,54 +468,7 @@ export default {
     }
   },
   async mounted(){
-    this.supplier = await new SuppliersCtrl().findById(this.supplier_id)
-    //console.log(this.supplier)
-    if(this.app_config.shader_name == 'amn1' && this.supplier.address){
-      try {
-        if(JSON.parse(this.supplier.address) && JSON.parse(this.supplier.address).comm_rate)
-        this.recp_init_comm_rate = parseFloat(JSON.parse(this.supplier.address).comm_rate)
-        console.log(parseFloat(JSON.parse(this.supplier.address).comm_rate))
-      } catch (err) {
-        console.log(err)
-      }
-    }
 
-    this.inc_headers = await new InoutHeadCtrl().findAll({supplier_id: this.supplier_id, day: this.recp_day})
-
-    this.total_nolon = await new CashflowCtrl().getSupplierNolons({supplier_id: this.supplier_id, day: this.recp_day})
-    // TODO ظبط
-    this.recp_expenses_dao = await new CashflowCtrl().getSupplierRecpExpenses({supplier_id: this.supplier_id, day: this.recp_day})
-    this.recp_expenses_dao = this.recp_expenses_dao ? this.recp_expenses_dao : new CashflowDAO({
-      state: 'supp_recp_expenses',
-      sum: '-',
-      amount: 0
-    })
-    this.recp_expenses = this.recp_expenses_dao.amount 
-    
-    let [receipt] = await new ReceiptsCtrl().findAll({supplier_id: this.supplier_id, day: this.recp_day})
-    
-    if(receipt) {
-      console.log(receipt)
-      this.modal_recp = receipt
-    } else {
-      console.log('np recp')
-      // if no recp_id init recp 
-      let outgoings_sums = await new OutgoingsCtrl().findSuppDaySums({supplier_id: this.supplier_id, day: this.recp_day})
-      if(outgoings_sums.length < 1) throw "No Details";
-      let new_recp = new ReceiptDAO({serial: 1, recp_given: this.recp_init_recp_given, comm_rate: this.recp_init_comm_rate, ...ReceiptDAO.INIT_DAO})
-      let all = outgoings_sums.map( dao => this.clone(dao))
-      new_recp.details = all
-      new_recp.total_nolon = this.total_nolon
-      new_recp.balance_was = this.supplier.balance
-      new_recp.recp_expenses = this.recp_expenses
-      new_recp.recp_deducts = this.recp_deducts
-      console.log(new_recp)
-      let ret_recp = await this.saveRecp(new_recp);
-      console.log(ret_recp);
-      // Save recp then get it
-      let [fresh_recp] = await new ReceiptsCtrl().findAll({supplier_id: this.supplier_id, day: this.recp_day})
-      this.modal_recp = fresh_recp
-    }
     this.refresh_all()
   },
   components: {
