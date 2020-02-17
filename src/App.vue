@@ -141,7 +141,7 @@
 
 
               <li class="nav-item" 
-              v-if="true || app_config.shader_name == 'amn1' && logged_in_user.user_type != 'editor'">
+              v-if=" app_config.shader_name == 'amn1' && logged_in_user.user_type != 'editor'">
                 <router-link class="nav-link active" to="/daily_rahn">
                   <span class="fa fa-box"></span>
                   مجمع الرهونات

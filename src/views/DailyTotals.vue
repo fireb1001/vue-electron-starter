@@ -194,8 +194,15 @@ repay_rahn
     <button class="btn btn-success pr-hideme"
     :disabled="day.stricted"
      @click="$bvModal.hide('modal-netincom');saveNetincome()" >
+      <span class="fa fa-money-check-alt "></span> &nbsp;
+      صرف
+    </button>
+    <span>&nbsp;</span>
+    <button class="btn btn-primary pr-hideme"
+    :disabled="day.stricted"
+     @click="$bvModal.hide('modal-netincom');saveNetincome(false)" >
       <span class="fa fa-check "></span> &nbsp;
-      حفظ
+      تم الصرف مسبقاً
     </button>
   </div>
 </b-modal>
@@ -340,7 +347,9 @@ sum_rahn_down
               </td>
               <!-- Not inlude recp diff for mmn1 -->
               <td v-if="show_totals.includes('net_income_no_diff')" >
-                <span class="text-success" @click="showIncomeModal(100,item.day)">
+                <span 
+                :class="{'text-success': netinc_paid_days[item.day], 'font-weight-bold': netinc_paid_days[item.day]}" 
+                @click="showIncomeModal(item.recp_sum_comm + item.out_sell_comm - item.sum_deducts,item.day)">
                 {{item.recp_sum_comm + item.out_sell_comm - item.sum_deducts | round }}
                 </span>
               </td>
@@ -468,6 +477,7 @@ sum_rahn_down
 import { MainMixin } from '../mixins/MainMixin'
 import { knex, moment } from '../main'
 import { Settings, DateTime } from 'luxon'
+import { CashflowCtrl, CashflowDAO } from '../ctrls/CashflowCtrl'
 
 Settings.defaultLocale = 'ar'
 Settings.defaultZoneName = 'UTC'
@@ -491,7 +501,8 @@ export default {
       show_daily: 'daily_totals',
       show_totals: '',
       all_fukn_expenses: [],
-      netincom_form: {day: '', amount: 0}
+      netincom_form: {day: '', amount: 0},
+      netinc_paid_days: {}
     }
   },
   mixins:[MainMixin],
@@ -499,11 +510,32 @@ export default {
     async save(evt) {
       evt.preventDefault()
     },
+    async saveNetincome(cashflow = true) {
+      let {day, amount}  = this.netincom_form
+      if(cashflow) {
+        // save out cashflow دفعة لا تخصم من الايراد
+        await new CashflowCtrl().save(new CashflowDAO({
+          amount: amount,
+          day: this.day.iso,
+          state: 'ex_comm',
+          sum: '-',
+          notes: 'عمولة يوم '+day
+        }))
+      }
+      // save daily flag
+      let [{json}] = await knex.raw(`select json from daily_close where day='${day}' `)
+      console.log(json)
+      if(json) json = JSON.parse(json)
+      json = { ...json, income_out: true}
+      await knex.raw(`update daily_close set json='${JSON.stringify(json)}' where day='${day}' `)
+      this.netincom_form = {day: '', amount : 0}
+      await this.refresh_all()
+    },
     async showInitModal() {
       this.$bvModal.show("init-modal");
     },
     async showExpModal() {
-      this.$bvModal.show("modal-netincom");
+      this.$bvModal.show("exp-modal");
     },
     async saveInitData(){
       console.log(this.init_data);
@@ -516,7 +548,10 @@ export default {
     },
     async showIncomeModal(amount, day) {
       console.log(amount, day)
-      this.$bvModal.show('modal-recp')
+      this.netincom_form.day = day
+      this.netincom_form.amount = Math.round(amount)
+
+      this.$bvModal.show('modal-netincom')
     },
     async saveExpData(){
       console.log(this.init_exp_data);
@@ -547,8 +582,13 @@ export default {
       let all_exp_init = await knex.raw(`select * from cashflow where state='expenses' and d_product='init'`);
       let all_exp_init_arr = {}
       all_exp_init.forEach(item => all_exp_init_arr[item.notes] = item.amount)
-      console.log(all_exp_init_arr)
       this.all_fukn_expenses = all_exp_init_arr
+
+      let netinc_paid_days = await knex.raw(`select day from daily_close where json like '%"income_out":"true"%' or  json like '%"income_out":true%'`);
+      let all = {}
+      netinc_paid_days.forEach(i => all[i.day] = true)
+      this.netinc_paid_days = all
+      console.log(this.netinc_paid_days)
     },
     async change_today_date(date){
       let dateTime = DateTime.fromISO(date)
@@ -600,10 +640,11 @@ export default {
   },
   async mounted() {
     console.log(this.$route)
-    this.refresh_all()
+    
     this.show_totals = this.shader_configs['show_totals'] ? this.shader_configs['show_totals'] : ''
     this.show_totals = this.show_only == 'rahn' ? 'rahn,repay_rahn' : this.show_totals
     this.show_totals = this.show_only == 'revenue' ? 'comms,recp_diff,out_cashflow,net_income' : this.show_totals
+    this.refresh_all()
   },
   props: ['show_only'],
   computed: {

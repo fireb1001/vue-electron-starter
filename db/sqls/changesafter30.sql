@@ -1,3 +1,11 @@
+-- 1.44
+-- F_STRICT_MODE
+
+INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+VALUES ('MANUAL_UPGRADED_TO', '1.44', '', 'default', 'config');
+
+update "shader_configs" set config_value='1.44' where config_name = 'MANUAL_UPGRADED_TO';
+
 -- 1.43
 -- Solve PRAGMA foreign_key_check;
 -- select * from receipts where cashflow_id not in (select id from cashflow);
@@ -20,10 +28,6 @@ update trans_types set flags = 'CUST_FORM' where optional = 3;
 INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags")
 VALUES ('repay_rahn_auto', 'تنزيل رهن بدون تأثير علي الحساب', 'default', '-', '', 'customer_trans', '', 'coll_anti_rahn', '', 'CUST_FORM');
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
-VALUES ('MANUAL_UPGRADED_TO', '1.43', '', 'default', 'config');
-
-update "shader_configs" set config_value='1.43' where config_name = 'MANUAL_UPGRADED_TO';
 -- change CUST_FORM for coll_anti_rahn
 -- rename repay_rahn_internal label
 --- 

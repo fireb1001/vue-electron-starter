@@ -1,4 +1,4 @@
-
+-- TODO add فرق الفواتير F_ADD_DIFF_TO_INCOME true
 
 INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category") 
 VALUES ('dealer_init', 'رصيد', 'default', '+', '', 'dealer_trans');

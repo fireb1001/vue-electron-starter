@@ -59,7 +59,13 @@
 
     <div class="alerty m-2" v-if="day.stricted">
       لا يمكن اضافة او تعديل علي يومية مغلقة, يمكن اعادة فتح اليومية للتعديل مع ملاحظة عدم ترحيل صافي الخزينة بالمبلغ الجديد
+      <div>
+        برجاء ادخال سبب فتح اليومية
+        <br/>
+        <textarea v-model="reason"></textarea>
+      </div>
       <button @click="reopen_day"
+      :disabled="reason.length < 3 "
       class="m-2 btn btn-danger"> اعادة فتح اليومية</button>
     </div> 
     
@@ -155,7 +161,8 @@ export default {
       men_rate : 1.5,
       password: null,
       sum_capital: 0,
-      net_cash: 0
+      net_cash: 0,
+      reason:''
     }
   },
   mixins:[MainMixin],
@@ -200,7 +207,11 @@ export default {
       
     },
     async reopen_day(){
-      await knex.raw(`update daily_close set closed='false' where day = '${this.day.iso}'`)
+      let [{json}] = await knex.raw(`select json from daily_close where day='${this.day.iso}' `)
+      console.log(json)
+      if(json) json = JSON.parse(json)
+      json = { ...json, reason: this.reason}
+      await knex.raw(`update daily_close set closed='false', json='${JSON.stringify(json)}' where day = '${this.day.iso}'`)
       await this.change_day(this.day.iso)
     },
     async addCashflow(evt) {

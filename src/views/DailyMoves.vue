@@ -95,7 +95,12 @@
 
     <div>
       <hr>
-      <h4>اجمالي ايرادات اليوم : {{daily_totals.recp_sum_comm + daily_totals.out_sell_comm + (daily_totals.sum_out_value - daily_totals.recp_sum_sale) - daily_totals.sum_deducts | round | toAR }}</h4>
+      <h4 v-if="shader_configs['F_ADD_DIFF_TO_INCOME']">اجمالي ايرادات اليوم : 
+        {{daily_totals.recp_sum_comm + daily_totals.out_sell_comm + (daily_totals.sum_out_value - daily_totals.recp_sum_sale)  | round | toAR }}
+      </h4>
+      <h4>اجمالي ايرادات اليوم : 
+        {{daily_totals.recp_sum_comm + daily_totals.out_sell_comm | round | toAR }}
+      </h4>
     </div>
 
     <div>
@@ -105,12 +110,17 @@
   
     <div>
       <hr>
-      <h4>اجمالي مشال التجار  : {{daily_totals.sum_mashal | round | toAR }}</h4>
+      <h4  v-if="shader_configs['F_ADD_DIFF_TO_INCOME']">صافي الايراد اليومي :
+         {{ daily_totals.recp_sum_comm + daily_totals.out_sell_comm + (daily_totals.sum_out_value - daily_totals.recp_sum_sale) - daily_totals.sum_deducts| round | toAR }}
+      </h4>
+      <h4 >صافي الايراد اليومي :
+         {{ daily_totals.recp_sum_comm + daily_totals.out_sell_comm - daily_totals.sum_deducts | round | toAR }}
+      </h4>
     </div>
 
     <div>
       <hr>
-      <h4>صافي الايراد اليومي : {{ daily_totals.recp_sum_comm + daily_totals.out_sell_comm + (daily_totals.sum_out_value - daily_totals.recp_sum_sale) - daily_totals.sum_deducts| round | toAR }}</h4>
+      <h4>اجمالي مشال التجار  : {{daily_totals.sum_mashal | round | toAR }}</h4>
     </div>
   
     <div v-if="app_config.shader_name != 'magdy'">

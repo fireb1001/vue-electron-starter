@@ -1,5 +1,5 @@
 <template>
-  <section class="supp-receipts-details m-3">
+  <section class="supp-receipts-details m-3" style="line-height: 1;">
   <section class="data-play pr-hideme" v-if="! receipt_d_mode">
 
     <router-link class="mr-3 btn btn-primary d-print-none pr-hideme" :to="{name:'supplier_details', params: {id: supplier.id}}">
@@ -477,10 +477,10 @@ v-if="app_config.shader_name == 'magdy'" >
         <thead>
           <tr>
             <th>الاجمالي</th>
-            <th :class="{ 'lrbrdr': app_config.shader_name == 'amn1'}">عدد المباع</th>
+            <th :class="{ 'lrbrdr': app_config.shader_name == 'amn1'}">عدد </th>
             <th :class="{ 'lrbrdr': app_config.shader_name == 'amn1'}"> الوزن</th>
             <th> </th>
-            <th :class="{ 'lrbrdr': app_config.shader_name == 'amn1'}" >سعر الكيلو
+            <th :class="{ 'lrbrdr': app_config.shader_name == 'amn1'}" >سعر 
             </th>
             <th :class="{ 'lrbrdr': app_config.shader_name == 'amn1'}" >الصنف</th>
             <th></th>
@@ -536,8 +536,7 @@ v-if="app_config.shader_name == 'magdy'" >
         <br/>
       </div>
     </div>
-        <br/>
-        <table class="table  table-sm pr-me-xx" >
+        <table class="table table-sm pr-me-xx" >
         <tbody>
           <tr class="noborder">
             <td colspan="4" class="noborder"></td>
@@ -664,7 +663,7 @@ v-if="app_config.shader_name == 'magdy'" >
         </tbody>
       </table>
 
-      <div class="m-2">
+      <div class="m-2 pr-hideme">
           <button class="btn btn-success pr-hideme" 
           v-if="! modal_recp.id || modal_recp.recp_paid == 0"
           @click="saveAll();" >
@@ -702,13 +701,16 @@ v-if="app_config.shader_name == 'magdy'" >
       </div>
 
   </div>
-        <p class="text-danger pr-me" v-if="app_config.shader_name != 'magdy'">
+      <div class="row">
+        <p class="col-9 text-danger pr-me" v-if="app_config.shader_name != 'magdy'">
           * خالص بيد حامله ولا تلغي أي شيكات أو ايصالات امانة
         </p>
-      <span> ف
+        <span class="col-2">
+         ف
         {{modal_recp.recp_paid}}
         (م {{modal_recp.serial}})
-      </span>
+        </span>
+      </div>
       </section>
       <!--</b-modal> -->
 
