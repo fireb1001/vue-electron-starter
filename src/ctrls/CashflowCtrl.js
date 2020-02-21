@@ -122,6 +122,7 @@ export class CashflowCtrl {
     let query = `SELECT id,supplier_id, day, amount from cashflow WHERE 
     state= 'supp_recp_expenses' and supplier_id = '${filter.supplier_id}' and income_day = '${filter.day}'`;
     let results = await knex.raw(query);
+    console.log("RES", query)
     let recp_expenses =
       results && results.length > 0 ? new CashflowDAO(results[0]) : null;
     return recp_expenses;

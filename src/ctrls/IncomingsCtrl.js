@@ -41,6 +41,7 @@ export class IncomingsData {
   products_arr = []
   nolon
   given
+  recp_expenses
 
   static get INIT_DAO() {
     return { }
@@ -90,8 +91,9 @@ export class IncomingsCtrl {
 
   /**@param {IncomingsData} data */
   async saveIncomingsData(data) {
-    
+    console.log(data)
     data.parseTypes()
+    console.log("now", data)
     let first_inc_id = null , products_ids = []
 
     await this.asyncEach(data.products_arr, async (product)=> {
@@ -107,14 +109,15 @@ export class IncomingsCtrl {
       first_inc_id = first_inc_id ? first_inc_id : record_id
     })
 
-    if(data.nolon || data.given ) {
+    if(data.nolon || data.given || data.recp_expenses ) {
 
       // default cashflow
       let cashDAO = new CashflowDAO({
         supplier_id: data.supplier_id,
         day: data.day,
         d_product: products_ids.join(),
-        incoming_id: first_inc_id
+        incoming_id: first_inc_id,
+        income_day: data.day
       })
 
       if(data.nolon) {
@@ -131,6 +134,12 @@ export class IncomingsCtrl {
         this.cashflowCtrl.save(cashDAO)
       }
       
+      if(data.recp_expenses) {
+        let transType = await this.transTypesCtrl.findOne({name: 'supp_recp_expenses', category: 'cashflow'})
+        cashDAO.transType = transType
+        cashDAO.amount = data.recp_expenses
+        this.cashflowCtrl.save(cashDAO)
+      }
     }
     return first_inc_id
   }
@@ -161,7 +170,9 @@ export class IncomingsCtrl {
         product_id: incom.product_id
       })
       q.andWhere('count','>=' , incom.diff)
+      // q.debug(true)
     }).fetch()
+    console.log(instance.get('count'))
     let rest = parseInt(instance.get('count') - parseInt(incom.diff))
     await instance.save({count: rest})
   }

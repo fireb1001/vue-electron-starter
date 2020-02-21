@@ -1,3 +1,6 @@
+-- 1.45
+delete from customer_trans where customer_id not in (select id from customers);
+
 -- 1.44
 -- F_STRICT_MODE
 
