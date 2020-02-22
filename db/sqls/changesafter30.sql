@@ -1,5 +1,7 @@
 -- 1.45
 delete from customer_trans where customer_id not in (select id from customers);
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
+VALUES ('kashf_header', 'kashf_mmn1.png', '', 'mmn1', 'config');
 
 -- 1.44
 -- F_STRICT_MODE
