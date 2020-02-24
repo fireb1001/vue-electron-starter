@@ -102,7 +102,8 @@ sum_supp_collect,
 sum_product_rahn,
 sum_mashal,
 sum_repay_rahn,
-sum_rahn_down
+sum_rahn_down,
+sum_rahn_increase
 FROM
 	( select DISTINCT day from outgoings UNION select DISTINCT day from incomings UNION select DISTINCT day from cashflow ) days
 LEFT JOIN 
@@ -122,6 +123,7 @@ LEFT JOIN
 	sum(case when state = 'given' then amount else null end) as sum_given,
 	sum(case when state = 'nolon' then amount else null end) as sum_nolon,
 	sum(case when state = 'rahn_down' then amount else null end) as sum_rahn_down,
+	sum(case when state = 'rahn_increase' then amount else null end) as sum_rahn_increase,
 	sum(case when state in ('cust_advance_pay','acc_rest') then amount else null end) as sum_cash_zm,
 	sum(case when state in ('collecting','cust_collecting','cust_in_collecting') then amount else null end) as sum_collect_zm,
 	sum(case when state = 'supp_payment' then amount else null end) as sum_supp_payment,

@@ -259,10 +259,10 @@ repay_rahn
               <th v-if="show_totals.includes('recp_given')"> {{'recp_given' | tr_label}} </th>
               <th v-if="show_totals.includes('given')"> {{'given' | tr_label}} </th>
               <th v-if="show_totals.includes('comms')"> {{'comms' | tr_label}} </th>
-              <th v-if="show_totals.includes('recp_diff')"> {{'recp_diff' | tr_label}} </th>
               <th v-if="show_totals.includes('recp_others')"> {{'recp_others' | tr_label}} </th>
               <th v-if="show_totals.includes('out_cashflow')"> {{'out_cashflow' | tr_label}} </th>
               <th v-if="show_totals.includes('net_income')"> {{'net_income' | tr_label}} </th>
+              <th v-if="show_totals.includes('recp_diff')"> {{'recp_diff' | tr_label}} </th>
               <th v-if="show_totals.includes('supp_payments')"> {{'supp_payments' | tr_label}} </th>
               <th v-if="show_totals.includes('supp_deducts')"> {{'supp_deducts' | tr_label}} </th>
               <th v-if="show_totals.includes('rahn')"> {{'rahn' | tr_label}}  </th>
@@ -302,15 +302,14 @@ sum_rahn_down
               <th v-if="show_totals.includes('comms')" >
                 {{sum_totals.sum_comm_plus_sell_comm | round}}
               </th>
-              <th v-if="show_totals.includes('recp_diff')"></th>
+              
               <th v-if="show_totals.includes('recp_others')">
               </th>
               <th v-if="show_totals.includes('out_cashflow')">
                 {{sum_totals.sum_deducts | round}}
               </th>
-              <th v-if="show_totals.includes('net_income')">
-
-              </th>
+              <th v-if="show_totals.includes('net_income')"></th>
+              <th v-if="show_totals.includes('recp_diff')"></th>
 
               <th v-if="show_totals.includes('supp_payments')">
                 {{sum_totals.sum_supp_payment | round}}
@@ -338,12 +337,15 @@ sum_rahn_down
               <th v-if="show_totals.includes('comms')" >
                 {{past_init_vals.comms | round}}
               </th>
-              <th v-if="show_totals.includes('recp_diff')"></th>
+              
               <th v-if="show_totals.includes('recp_others')"></th>
 
               <th v-if="show_totals.includes('out_cashflow')">
                 {{past_init_vals.out_cashflow | round}}
               </th>
+
+              <th v-if="show_totals.includes('recp_diff')"></th>
+
               <th v-if="show_totals.includes('net_income')">
                 {{past_init_vals.net_income | round}}
               </th>
@@ -380,9 +382,7 @@ sum_rahn_down
               <td v-if="show_totals.includes('comms')">
                 {{item.recp_sum_comm + item.out_sell_comm | round }}
               </td>
-              <td v-if="show_totals.includes('recp_diff')">
-                {{item.sum_out_value - item.recp_sum_sale | round }}
-              </td>
+
               <td v-if="show_totals.includes('recp_others')">
                 {{item.recp_sum_others | round }}
               </td>
@@ -401,7 +401,10 @@ sum_rahn_down
                 
                 {{item.recp_sum_comm + item.out_sell_comm + (item.sum_out_value - item.recp_sum_sale) - item.sum_deducts | round }}
               </td>
-              
+               
+              <td v-if="show_totals.includes('recp_diff')">
+                {{item.sum_out_value - item.recp_sum_sale | round }}
+              </td>
               <td v-if="show_totals.includes('supp_payments')">
                 {{item.sum_supp_payment | round }}
               </td>
@@ -426,9 +429,7 @@ sum_rahn_down
               <th v-if="show_totals.includes('comms')" >
                 {{sum_totals.sum_comm_plus_sell_comm | round}}
               </th>
-              <th v-if="show_totals.includes('recp_diff')">
-                {{sum_totals.recp_sum_diff | round}}
-              </th>
+
               <th v-if="show_totals.includes('recp_others')">
                 {{sum_totals.recp_sum_others | round}}
               </th>
@@ -437,6 +438,10 @@ sum_rahn_down
               </th>
               <th v-if="show_totals.includes('net_income')">
                 {{sum_totals.sum_net_income | round}}
+              </th>
+
+              <th v-if="show_totals.includes('recp_diff')">
+                {{sum_totals.recp_sum_diff | round}}
               </th>
 
               <th v-if="show_totals.includes('supp_payments')">
@@ -718,7 +723,7 @@ export default {
     
     this.show_totals = this.shader_configs['show_totals'] ? this.shader_configs['show_totals'] : ''
     this.show_totals = this.show_only == 'rahn' ? 'rahn,repay_rahn' : this.show_totals
-    this.show_totals = this.show_only == 'revenue' ? 'comms,recp_diff,out_cashflow,net_income' : this.show_totals
+    this.show_totals = this.show_only == 'revenue' ? 'comms,recp_diff,out_cashflow,net_income_no_diff' : this.show_totals
     this.refresh_all()
   },
   props: ['show_only'],
@@ -768,7 +773,7 @@ export default {
         sum_totals.sum_product_rahn += one.sum_product_rahn
         sum_totals.sum_repay_rahn += one.sum_repay_rahn + one.sum_rahn_down
         sum_totals.sum_net_income += one.recp_sum_comm + one.out_sell_comm + (one.sum_out_value - one.recp_sum_sale) - one.sum_deducts
-      })  
+      })
       return sum_totals
     },
     checkedTotals: function(){
