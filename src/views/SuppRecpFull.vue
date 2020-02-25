@@ -7,11 +7,13 @@
     style="width: 100%;margin: -25px auto;margin-top: -75px;"/>
   </template>
 
-  <h4 class="text-center"> فاتورة 
+  <h3 class="text-center" style="
+    margin-bottom: -1.5em;
+    margin-top: 1.5em;"> فاتورة 
     <span class="pr-hideme">
       ({{modal_recp.serial}})
     </span>
-  </h4>
+  </h3>
 
 <div style="display: grid;grid-template-columns: auto auto;">
   <div >

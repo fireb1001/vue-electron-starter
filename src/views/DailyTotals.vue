@@ -167,7 +167,7 @@ repay_rahn
     </b-modal>
 
 
-    <!-- expenses Modal -->
+    <!-- netincom Modal -->
 <b-modal id="modal-netincom"  
  hide-footer hide-header-close hide-backdrop>
   <template slot="modal-title">
@@ -207,6 +207,46 @@ repay_rahn
   </div>
 </b-modal>
 
+    <!-- expenses Modal -->
+<b-modal id="modal-recpgiven"  
+ hide-footer hide-header-close hide-backdrop>
+  <template slot="modal-title">
+    صرف الوهبة  ليوم {{recpgiven_form.day | arDate}}
+  </template>
+  <table class="table table-striped table-sm pr-me">
+    <thead>
+      <tr>
+        <th>المبلغ</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr >
+        <td>{{recpgiven_form.amount}}</td>
+        <td>
+          <input v-model="recpgiven_form.amount" class="form-control"  >
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="m-2">
+    <button class="btn btn-success pr-hideme"
+    :disabled="day.stricted"
+     @click="$bvModal.hide('modal-recpgiven');saveRecpgiven()" >
+      <span class="fa fa-money-check-alt "></span> &nbsp;
+      صرف
+    </button>
+    <span>&nbsp;</span>
+    <button class="btn btn-primary pr-hideme"
+    :disabled="day.stricted"
+     @click="$bvModal.hide('modal-recpgiven');saveRecpgiven(false)" >
+      <span class="fa fa-check "></span> &nbsp;
+      تم الصرف مسبقاً
+    </button>
+  </div>
+</b-modal>
+
     <section class="m-2" v-if="show_daily == 'daily_totals'">
     <h2 v-if="show_only =='rahn'">الرهونات اليومية</h2>
     <h2 v-else-if="show_only =='revenue'">الارباح اليومية</h2>
@@ -219,10 +259,10 @@ repay_rahn
               <th v-if="show_totals.includes('recp_given')"> {{'recp_given' | tr_label}} </th>
               <th v-if="show_totals.includes('given')"> {{'given' | tr_label}} </th>
               <th v-if="show_totals.includes('comms')"> {{'comms' | tr_label}} </th>
-              <th v-if="show_totals.includes('recp_diff')"> {{'recp_diff' | tr_label}} </th>
               <th v-if="show_totals.includes('recp_others')"> {{'recp_others' | tr_label}} </th>
               <th v-if="show_totals.includes('out_cashflow')"> {{'out_cashflow' | tr_label}} </th>
               <th v-if="show_totals.includes('net_income')"> {{'net_income' | tr_label}} </th>
+              <th v-if="show_totals.includes('recp_diff')"> {{'recp_diff' | tr_label}} </th>
               <th v-if="show_totals.includes('supp_payments')"> {{'supp_payments' | tr_label}} </th>
               <th v-if="show_totals.includes('supp_deducts')"> {{'supp_deducts' | tr_label}} </th>
               <th v-if="show_totals.includes('rahn')"> {{'rahn' | tr_label}}  </th>
@@ -262,15 +302,14 @@ sum_rahn_down
               <th v-if="show_totals.includes('comms')" >
                 {{sum_totals.sum_comm_plus_sell_comm | round}}
               </th>
-              <th v-if="show_totals.includes('recp_diff')"></th>
+              
               <th v-if="show_totals.includes('recp_others')">
               </th>
               <th v-if="show_totals.includes('out_cashflow')">
                 {{sum_totals.sum_deducts | round}}
               </th>
-              <th v-if="show_totals.includes('net_income')">
-
-              </th>
+              <th v-if="show_totals.includes('net_income')"></th>
+              <th v-if="show_totals.includes('recp_diff')"></th>
 
               <th v-if="show_totals.includes('supp_payments')">
                 {{sum_totals.sum_supp_payment | round}}
@@ -298,12 +337,15 @@ sum_rahn_down
               <th v-if="show_totals.includes('comms')" >
                 {{past_init_vals.comms | round}}
               </th>
-              <th v-if="show_totals.includes('recp_diff')"></th>
+              
               <th v-if="show_totals.includes('recp_others')"></th>
 
               <th v-if="show_totals.includes('out_cashflow')">
                 {{past_init_vals.out_cashflow | round}}
               </th>
+
+              <th v-if="show_totals.includes('recp_diff')"></th>
+
               <th v-if="show_totals.includes('net_income')">
                 {{past_init_vals.net_income | round}}
               </th>
@@ -328,7 +370,11 @@ sum_rahn_down
                 </span>
               </td>
               <td v-if="show_totals.includes('recp_given')">
+                <span 
+                :class="{'text-success': recpgiven_paid_days[item.day], 'font-weight-bold': recpgiven_paid_days[item.day]}" 
+                @click="showRecpgivenModal(item.recp_sum_given, item.day)">
                 {{item.recp_sum_given | round }}
+                </span>
               </td>
               <td v-if="show_totals.includes('given')">
                 {{item.sum_given | round }}
@@ -336,9 +382,7 @@ sum_rahn_down
               <td v-if="show_totals.includes('comms')">
                 {{item.recp_sum_comm + item.out_sell_comm | round }}
               </td>
-              <td v-if="show_totals.includes('recp_diff')">
-                {{item.sum_out_value - item.recp_sum_sale | round }}
-              </td>
+
               <td v-if="show_totals.includes('recp_others')">
                 {{item.recp_sum_others | round }}
               </td>
@@ -349,7 +393,7 @@ sum_rahn_down
               <td v-if="show_totals.includes('net_income_no_diff')" >
                 <span 
                 :class="{'text-success': netinc_paid_days[item.day], 'font-weight-bold': netinc_paid_days[item.day]}" 
-                @click="showIncomeModal(item.recp_sum_comm + item.out_sell_comm - item.sum_deducts,item.day)">
+                @click="showIncomeModal(item.recp_sum_comm + item.out_sell_comm - item.sum_deducts, item.day)">
                 {{item.recp_sum_comm + item.out_sell_comm - item.sum_deducts | round }}
                 </span>
               </td>
@@ -357,7 +401,10 @@ sum_rahn_down
                 
                 {{item.recp_sum_comm + item.out_sell_comm + (item.sum_out_value - item.recp_sum_sale) - item.sum_deducts | round }}
               </td>
-              
+               
+              <td v-if="show_totals.includes('recp_diff')">
+                {{item.sum_out_value - item.recp_sum_sale | round }}
+              </td>
               <td v-if="show_totals.includes('supp_payments')">
                 {{item.sum_supp_payment | round }}
               </td>
@@ -382,9 +429,7 @@ sum_rahn_down
               <th v-if="show_totals.includes('comms')" >
                 {{sum_totals.sum_comm_plus_sell_comm | round}}
               </th>
-              <th v-if="show_totals.includes('recp_diff')">
-                {{sum_totals.recp_sum_diff | round}}
-              </th>
+
               <th v-if="show_totals.includes('recp_others')">
                 {{sum_totals.recp_sum_others | round}}
               </th>
@@ -393,6 +438,10 @@ sum_rahn_down
               </th>
               <th v-if="show_totals.includes('net_income')">
                 {{sum_totals.sum_net_income | round}}
+              </th>
+
+              <th v-if="show_totals.includes('recp_diff')">
+                {{sum_totals.recp_sum_diff | round}}
               </th>
 
               <th v-if="show_totals.includes('supp_payments')">
@@ -502,13 +551,34 @@ export default {
       show_totals: '',
       all_fukn_expenses: [],
       netincom_form: {day: '', amount: 0},
-      netinc_paid_days: {}
+      recpgiven_form: {day: '', amount: 0},
+      netinc_paid_days: {},
+      recpgiven_paid_days: {}
     }
   },
   mixins:[MainMixin],
   methods: {
     async save(evt) {
       evt.preventDefault()
+    },
+    async saveRecpgiven(cashflow = true){
+      let {day, amount}  = this.recpgiven_form
+      if(cashflow) {
+        await new CashflowCtrl().save(new CashflowDAO({
+          amount: amount,
+          day: this.day.iso,
+          state: 'expenses',
+          sum: '-',
+          notes: 'صرف وهبة ليوم '+day
+        }))
+      }
+      // save daily flag
+      let [{json}] = await knex.raw(`select json from daily_close where day='${day}' `)
+      if(json) json = JSON.parse(json)
+      json = { ...json, recpgiven_out: true}
+      await knex.raw(`update daily_close set json='${JSON.stringify(json)}' where day='${day}' `)
+      this.recpgiven_form = {day: '', amount : 0}
+      await this.refresh_all()
     },
     async saveNetincome(cashflow = true) {
       let {day, amount}  = this.netincom_form
@@ -545,6 +615,12 @@ export default {
        'init-totals','${JSON.stringify(this.init_data)}','${this.init_data.day}'
       )`);
       this.$bvModal.hide("init-modal");
+    },
+    async showRecpgivenModal(amount, day){
+      this.recpgiven_form.day = day
+      this.recpgiven_form.amount = Math.round(amount)
+
+      this.$bvModal.show('modal-recpgiven')
     },
     async showIncomeModal(amount, day) {
       console.log(amount, day)
@@ -585,9 +661,13 @@ export default {
       this.all_fukn_expenses = all_exp_init_arr
 
       let netinc_paid_days = await knex.raw(`select day from daily_close where json like '%"income_out":"true"%' or  json like '%"income_out":true%'`);
+      let recpgiven_days = await knex.raw(`select day from daily_close where json like '%"recpgiven_out":"true"%' or  json like '%"recpgiven_out":true%'`);
       let all = {}
+      let all_recpgiven = {}
       netinc_paid_days.forEach(i => all[i.day] = true)
+      recpgiven_days.forEach(i => all_recpgiven[i.day] = true)
       this.netinc_paid_days = all
+      this.recpgiven_paid_days = all_recpgiven
       console.log(this.netinc_paid_days)
     },
     async change_today_date(date){
@@ -643,7 +723,7 @@ export default {
     
     this.show_totals = this.shader_configs['show_totals'] ? this.shader_configs['show_totals'] : ''
     this.show_totals = this.show_only == 'rahn' ? 'rahn,repay_rahn' : this.show_totals
-    this.show_totals = this.show_only == 'revenue' ? 'comms,recp_diff,out_cashflow,net_income' : this.show_totals
+    this.show_totals = this.show_only == 'revenue' ? 'comms,recp_diff,out_cashflow,net_income_no_diff' : this.show_totals
     this.refresh_all()
   },
   props: ['show_only'],
@@ -693,7 +773,7 @@ export default {
         sum_totals.sum_product_rahn += one.sum_product_rahn
         sum_totals.sum_repay_rahn += one.sum_repay_rahn + one.sum_rahn_down
         sum_totals.sum_net_income += one.recp_sum_comm + one.out_sell_comm + (one.sum_out_value - one.recp_sum_sale) - one.sum_deducts
-      })  
+      })
       return sum_totals
     },
     checkedTotals: function(){

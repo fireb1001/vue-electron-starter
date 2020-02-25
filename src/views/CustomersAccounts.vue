@@ -34,9 +34,9 @@
 hide-header hide-footer hide-header-close hide-backdrop>
 
 <template>
-  <p class="recp-header pr-only" v-if="shader_configs['recp_header'] && ! shader_configs['recp_header'].includes('.png')" v-html="shader_configs['recp_header']"></p>
-  <img class=" pr-only" v-if="shader_configs['recp_header'] && shader_configs['recp_header'].includes('.png')"
-  :src="require(`@/assets/${shader_configs['recp_header']}`)" 
+  <p class="recp-header pr-only" v-if="kashf_header && ! kashf_header.includes('.png')" v-html="kashf_header"></p>
+  <img class=" pr-only" v-if="kashf_header && kashf_header.includes('.png')"
+  :src="require(`@/assets/${kashf_header}`)" 
    style="width: 100%;margin: 0px auto;margin-top: -25px;"/>
 </template>
 
@@ -56,9 +56,9 @@ hide-header hide-footer hide-header-close hide-backdrop>
     <h2 class="text-center" v-if="daily_out_trans[0] && app_config.shader_name == 'magdy'"> حساب سابق : {{ daily_out_trans[0].debt_was | toAR }}</h2>
   </div>
 </div>
-<img v-if="! shader_configs['recp_header'].includes('.png')"
+<img v-if="! kashf_header.includes('.png')"
 :src='`https://i.imgur.com/HieletO.png`' style="margin-top: -375px;float: right;margin-right: 30px;" width="150" class="pr-only"/>
-<img v-if="! shader_configs['recp_header'].includes('.png')"
+<img v-if="! kashf_header.includes('.png')"
 :src='`https://i.imgur.com/HieletO.png`' style="margin-top: -375px;float: left;margin-left: 30px;" width="150" class="pr-only"/>
   <div class="table-responsive p-2 m-2" style="border: 2px solid #79ace0; border-radius: 12px;" > 
       <table class="table table-bordered table-sm pr-me-xx" >
@@ -251,6 +251,7 @@ export default {
       outg_day: {},
       daily_out_trans: [],
       customer: {},
+      kashf_header: '',
       d_collect_form: {
         id: null,
         trans_type: "cust_collecting",
@@ -449,6 +450,7 @@ export default {
     }
   },
   mounted() {
+    this.kashf_header = this.shader_configs['kashf_header'] ? this.shader_configs['kashf_header'] : this.shader_configs['recp_header']
     this.refresh_all();
   }
 };

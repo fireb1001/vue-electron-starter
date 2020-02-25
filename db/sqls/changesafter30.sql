@@ -1,5 +1,10 @@
--- 1.45
+-- 1.45 
+-- views
+update "shader_configs" set config_value='1.45' where config_name = 'MANUAL_UPGRADED_TO';
+-- (only 4 mmn1)
 delete from customer_trans where customer_id not in (select id from customers);
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
+VALUES ('kashf_header', 'kashf_mmn1.png', '', 'mmn1', 'config');
 
 -- 1.44
 -- F_STRICT_MODE
@@ -10,7 +15,6 @@ VALUES ('demo_hide', 'true', '', 'mmn1', 'config');
 INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('MANUAL_UPGRADED_TO', '1.44', '', 'default', 'config');
 
-update "shader_configs" set config_value='1.44' where config_name = 'MANUAL_UPGRADED_TO';
 
 -- 1.43
 -- Solve PRAGMA foreign_key_check;

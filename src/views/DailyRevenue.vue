@@ -33,9 +33,9 @@
             <tr>
               <th>اليوم</th>
               <th v-if="show_totals.includes('comms')"> {{'comms' | tr_label}} </th>
-              <th v-if="show_totals.includes('recp_diff')"> {{'recp_diff' | tr_label}} </th>
               <th v-if="show_totals.includes('out_cashflow')"> {{'out_cashflow' | tr_label}} </th>
               <th v-if="show_totals.includes('net_income')"> {{'net_income' | tr_label}} </th>
+              <th v-if="show_totals.includes('recp_diff')"> {{'recp_diff' | tr_label}} </th>
             </tr>
           </thead>
           <tbody>
@@ -48,16 +48,17 @@
               <td v-if="show_totals.includes('comms')">
                 {{item.recp_sum_comm + item.out_sell_comm | round }}
               </td>
-              <td v-if="show_totals.includes('recp_diff')">
-                {{item.sum_out_value - item.recp_sum_sale | round }}
-              </td>
+
               <td v-if="show_totals.includes('out_cashflow')">
                 {{item.sum_deducts | round }}
               </td>
               <td v-if="show_totals.includes('net_income')">
-                {{item.recp_sum_comm + item.out_sell_comm + (item.sum_out_value - item.recp_sum_sale) - item.sum_deducts | round }}
+                {{item.recp_sum_comm + item.out_sell_comm - item.sum_deducts | round }}
               </td>
-              
+
+              <td v-if="show_totals.includes('recp_diff')">
+                {{item.sum_out_value - item.recp_sum_sale | round }}
+              </td>
             </tr>
             <tr >
               <th>المجموع</th>
@@ -69,6 +70,7 @@
         <button class="btn btn-printo pr-hideme"  @click="print_co">
           <span class="fa fa-print"></span> طباعة
         </button>
+        {{sum_totals}}
   </section>
 </template>
 <script>
@@ -118,7 +120,7 @@ export default {
       } else {
         this.daily_totals = await knex('v_daily_sums').orderBy('day',"asc")
       }
-      console.log(this.daily_totals)
+      //console.log(this.daily_totals)
       let all_exp_init = await knex.raw(`select * from cashflow where state='expenses' and d_product='init'`);
       let all_exp_init_arr = {}
       all_exp_init.forEach(item => all_exp_init_arr[item.notes] = item.amount)
@@ -168,9 +170,12 @@ export default {
   },
   computed: {
     sum_totals: function() {
-      let sum_totals = {}
       //this.daily_totals
-      return sum_totals
+      let total = this.daily_totals.reduce((prev_val, new_val)=> {
+        comms: prev_val.comms + new_val.comms
+      })
+      console.log("totals", total)
+      return total
     }
   }
 }

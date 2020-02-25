@@ -220,9 +220,9 @@
 <b-modal id="modal-daily" size="xl" class="col-print-12"
 hide-header hide-footer hide-header-close hide-backdrop>
 <template>
-  <p class="recp-header pr-only" v-if="shader_configs['recp_header'] && ! shader_configs['recp_header'].includes('.png')" v-html="shader_configs['recp_header']"></p>
-  <img class=" pr-only" v-if="shader_configs['recp_header'] && shader_configs['recp_header'].includes('.png')"
-  :src="require(`@/assets/${shader_configs['recp_header']}`)" 
+  <p class="recp-header pr-only" v-if="kashf_header && ! kashf_header.includes('.png')" v-html="kashf_header"></p>
+  <img class=" pr-only" v-if="kashf_header && kashf_header.includes('.png')"
+  :src="require(`@/assets/${kashf_header}`)" 
    style="width: 100%;margin: 0px auto;margin-top: -25px;"/>
 </template>
 
@@ -242,9 +242,9 @@ hide-header hide-footer hide-header-close hide-backdrop>
   </div>
 </div>
 
-<img v-if="! shader_configs['recp_header'].includes('.png')"
+<img v-if="! kashf_header.includes('.png')"
 :src='`https://i.imgur.com/HieletO.png`' style="margin-top: -375px;float: right;margin-right: 30px;" width="150" class="pr-only" />
-<img v-if="! shader_configs['recp_header'].includes('.png')"
+<img v-if="! kashf_header.includes('.png')"
 :src='`https://i.imgur.com/HieletO.png`'  style="margin-top: -375px;float: left;margin-left: 30px;" width="150" class="pr-only"/>
 
   <div class="table-responsive p-2 m-2" style="border: 2px solid #79ace0; border-radius: 12px;" > 
@@ -442,7 +442,8 @@ export default {
       sell_rest: {actual_sale: 0 , notes: ''},
       outg_day: {},
       show_trans_after: '',
-      net_rahn: 0
+      net_rahn: 0,
+      kashf_header:''
     }
   },
   mixins: [MainMixin],
@@ -617,6 +618,7 @@ export default {
   },
   components: { AlertDay },
   mounted() {
+    this.kashf_header = this.shader_configs['kashf_header'] ? this.shader_configs['kashf_header'] : this.shader_configs['recp_header']
     this.getCustomerDetails()
     this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
       if(modalId == 'modal-daily') this.flags.modal_closed = false
