@@ -1,3 +1,14 @@
+-- move days
+
+update cashflow set day='2020-02-24' where day='2020-02-25';
+update customer_trans set day='2020-02-24' where day='2020-02-25';
+update outgoings set day='2020-02-24' where day='2020-02-25';
+update outgoings set income_day='2020-02-24' where income_day='2020-02-25';
+update receipt_details set day='2020-02-24' where day='2020-02-25';
+update receipts set day='2020-02-24' where day='2020-02-25';
+update supplier_trans set day='2020-02-24' where day='2020-02-25';
+update incomings set day='2020-02-24' where day='2020-02-25';
+
 -- 0.1.24
 ALTER TABLE receipts add recp_others REAL;
 
