@@ -132,12 +132,12 @@
       <hr>
       <h4>تحصيلات اليوم : {{ daily_totals.sum_collect_zm | round | toAR }}</h4>
     </div>
-  
+    <!--
     <div v-if="app_config.shader_name == 'amn1'">
       <hr>
       <h4>{{'sum_capital' | tr_label}}: {{ sum_capital | round | toAR }}</h4>
     </div>
-
+    -->
   
   </section>
 
@@ -146,6 +146,24 @@
       <h4>صافي الخزينة : {{ cash_sums.net | toAR(true) }}</h4>
     </div>
   <hr>
+
+      <div v-if="app_config.shader_name == 'amn1'">
+
+        <table class="table table-bordered mt-1 pr-hideme">
+        <tr>
+          <th> العميل</th>
+          <td>{{phone}}</td>
+
+          <th> العميل</th>
+          <td>{{address}}</td>
+        </tr>
+        <tr>
+          <th>{{'sum_capital' | tr_label}}</th>
+          <td>{{ sum_capital | round | toAR }}</td>
+        </tr>
+      </table>
+      <hr>
+      </div>
   <section class="inout-cashflow">
     <h2>
       {{'menu_collecting'| tr_label}} اليوم

@@ -336,11 +336,12 @@ export default {
       let init_time = new Date().getTime()
       let soft_delete = this.flags.show_active
       if(this.flags.show_g_than)
-      this.customers_arr = await this.customersCtrl.findAll(
+      this.customers_arr = await new CustomersCtrl().findAll(
         {debt_g_than: this.flags.show_g_than},
         {
           softDelete: soft_delete, 
-          orderByDebt: this.app_config.shader_name != 'nada'
+          orderByDebt: this.app_config.shader_name != 'nada' && this.app_config.shader_name != 'mmn1',
+          noOrderByName: this.app_config.shader_name == 'mmn1'
         }
       )
       else {
@@ -356,7 +357,8 @@ export default {
       this.flags.show_g_than = false
       let soft_delete = this.flags.show_active
       this.customers_arr = await this.customersCtrl.findAll({},{softDelete: soft_delete, 
-        orderByDebt: this.app_config.shader_name != 'nada'
+        orderByDebt: this.app_config.shader_name != 'nada' && this.app_config.shader_name != 'mmn1',
+        noOrderByName: this.app_config.shader_name == 'mmn1'
       })
     },
     fresh_form(){

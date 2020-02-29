@@ -189,6 +189,7 @@ export class DealersCtrl {
   }
 
   async permenentDeleteById(id) {
+    await knex.raw(`delete from dealer_trans where dealer_id = ${id}`);
     await knex.raw(`delete from dealers where id = ${id}`)
   }
 

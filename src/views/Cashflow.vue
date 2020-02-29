@@ -195,7 +195,7 @@ export default {
         // states = ['collecting','outgoing_cash','supp_collect','cust_trust','cust_rahn','inc_collect'] 
         sum = '+'
       }
-      this.cashflow_arr = await this.cashflowCtrl.findAll({sum: sum, day: this.$store.state.day.iso})
+      this.cashflow_arr = await this.cashflowCtrl.findAll({sum: sum, day: this.$store.state.day.iso},'id')
       this.ex_items_arr = await this.cashflowCtrl.getExItems();
       let day_count_res = await knex.raw(`SELECT sum(count) as sum_count FROM outgoings where day='${this.$store.state.day.iso}'`)
 

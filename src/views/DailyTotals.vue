@@ -1,5 +1,28 @@
 <template>
+
   <section class="template m-3">
+
+    <b-modal
+      id="pass-in"
+      hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
+      hide-header-close
+      class="p-4"
+    >
+      <form @submit="passSubmit">
+        <p class="h4 text-center mb-4">ادخل كلمة المرور</p>
+        <br />
+        <label for="defaultFormLoginPasswordEx" class="grey-text">كلمة المرور</label>
+        <input type="password" v-model.lazy="password" class="form-control" />
+        <div class="text-center mt-4">
+          <button class="btn btn-success" type="submit">عرض</button> 
+          <span>&nbsp;</span>
+          <button class="btn btn-danger" @click="$bvModal.hide('pass-in')">اغلاق</button> 
+        </div>
+      </form>
+    </b-modal>
+
     <h2>الفترة</h2>
     <div class="row">
       <div class="col-4">
@@ -419,7 +442,12 @@ sum_rahn_down
               </td>
             </tr>
             <tr >
-              <th>المجموع</th>
+              <th>
+                <span @click="show_dialog()">
+                 المجموع
+                </span>
+              </th>
+              <template v-if="flags.show_totals_confirm" >
               <th v-if="show_totals.includes('recp_given')">
                 {{sum_totals.recp_sum_given | round}}
               </th>
@@ -456,6 +484,7 @@ sum_rahn_down
               <th v-if="show_totals.includes('repay_rahn')">
                 {{sum_totals.sum_repay_rahn | round}}
               </th>
+              </template>
             </tr>
           </tbody>
         </table>
@@ -535,6 +564,7 @@ export default {
   name: 'daily-totals',
   data() {
     return {
+      flags: { show_totals_confirm : false },
       daily_totals: [],
       daily_expenses: [],
       checkedItems: [],
@@ -546,6 +576,7 @@ export default {
       past_init_vals: null,
       from_day: '',
       to_day: '',
+      password: null,
       max_datetime: '',
       show_daily: 'daily_totals',
       show_totals: '',
@@ -558,6 +589,20 @@ export default {
   },
   mixins:[MainMixin],
   methods: {
+        async show_dialog() {
+      if(this.shader_configs['F_MMN1_PASS']) {
+        this.$bvModal.show("pass-in");
+      } else {
+        this.flags.show_totals_confirm = ! this.flags.show_totals_confirm
+      }
+    },
+    async passSubmit(evt){
+      evt.preventDefault();
+      if(this.shader_configs['F_MMN1_PASS'] == this.password){
+        this.flags.show_totals_confirm = ! this.flags.show_totals_confirm
+        this.$bvModal.hide("pass-in");
+      }
+    },
     async save(evt) {
       evt.preventDefault()
     },
@@ -720,7 +765,8 @@ export default {
   },
   async mounted() {
     console.log(this.$route)
-    
+    if(! this.shader_configs['F_MMN1_PASS'])
+      this.flags.show_totals_confirm = true
     this.show_totals = this.shader_configs['show_totals'] ? this.shader_configs['show_totals'] : ''
     this.show_totals = this.show_only == 'rahn' ? 'rahn,repay_rahn' : this.show_totals
     this.show_totals = this.show_only == 'revenue' ? 'comms,recp_diff,out_cashflow,net_income_no_diff' : this.show_totals

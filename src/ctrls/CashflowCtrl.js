@@ -70,13 +70,15 @@ export class CashflowCtrl {
     return record.id;
   }
 
-  async findAll(filter = {}) {
+  async findAll(filter = {}, orderBy = '') {
     // {withRelated: ['supplier','product','customer']}
     let all = await this.model
       .where(filter)
       .query(function(qb) {
-        qb.orderBy("customer_id", "DESC");
-        qb.orderBy("supplier_id", "DESC");
+        if(orderBy != 'id') {
+          qb.orderBy("customer_id", "DESC");
+          qb.orderBy("supplier_id", "DESC");
+        }
       })
       .fetchAll({ withRelated: ["outgoing", "customer", "supplier","dealer"] });
     return all.map(_ => {

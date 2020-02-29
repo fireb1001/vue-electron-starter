@@ -167,7 +167,7 @@
             <template v-for="(trans, idx) in comp_customer_trans" >
             <tr :key='idx' 
             v-if="
-            trans.amount && 
+            ! ( trans.amount == 0 && trans.trans_type == 'init') &&
             trans.trans_type != 'coll_anti_rahn' &&
             trans.trans_type != 'repay_rahn_auto' &&
             trans.trans_type != 'add_rahn_auto' &&
@@ -568,7 +568,7 @@ export default {
     },
     async createCustomerTrans(evt , trans_form = null ) {
       evt.preventDefault()
-      console.log(trans_form)
+      // console.log(trans_form)
       if(! trans_form)
         trans_form = this.customer_trans_form
       let selectedTrans = await this.transTypesCtrl.findOne({name: trans_form.trans_type , category: 'customer_trans'})
@@ -613,6 +613,7 @@ export default {
       
       this.getCustomerDetails()
       trans_form = {trans_type:trans_form.trans_type, amount: null , notes: null}
+      this.customer_trans_form = trans_form
       this.$root.$emit('bv::toggle::collapse', 'collapse_collect')
     }
   },

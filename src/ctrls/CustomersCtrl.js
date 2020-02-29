@@ -116,7 +116,7 @@ export class CustomersCtrl {
 
   async findAll(
     filter = { limit: null, debt_g_than: null },
-    options = { orderByName: false, orderByDebt: false, softDelete: false }
+    options = { orderByName: false, orderByDebt: false, softDelete: false, noOrderByName: false }
   ) {
     //let all = await this.model.where(filter).fetchAll(options)
     // let results = await knex(`v_customers`)
@@ -136,22 +136,25 @@ ${options.orderByName ? "order by name " : ""}  ${
 ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
 `;
     */
+   console.log("options", options)
    let query = `
    select * from 
    (select customer_id, sum(amount) as sum_debt from customer_trans 
    group by customer_id 
    ${filter.debt_g_than ? " having sum(amount)> "+ parseInt(filter.debt_g_than) : ""}
    ) customer_trans_g
-   LEFT join
+   join
    (select * from customers where 1=1
     ${options.softDelete ? " and deleted_at is null" : ""}
      ) customers_g
    ON customer_trans_g.customer_id = customers_g.id 
-   ${options.orderByDebt ? 'order by debt desc' : 'order by name '}
-   ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
    `;
+   if(! options.noOrderByName) query +=
+   `${ options.orderByDebt ? 'order by debt desc' : 'order by name '}`
 
-    // console.log(query)
+   query +=`${filter.limit ? "limit " + parseInt(filter.limit) : ""}`
+
+    console.log(query)
     let results = await knex.raw(query);
     return results.map(_ => new CustomerDAO(_));
   }
@@ -391,6 +394,7 @@ select * from customer_trans where customer_id = ${customer_id} and trans_type =
   }
 
   async permenentDeleteById(id) {
+    await knex.raw(`delete from customer_trans where customer_id = ${id}`);
     await knex.raw(`delete from customers where id = ${id}`);
   }
 

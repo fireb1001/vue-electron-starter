@@ -142,7 +142,7 @@ v-if="app_config.shader_name == 'magdy'" >
             <td  :class="{ 'bbordered': app_config.shader_name == 'amn1'}">{{ 'recp_expenses' | tr_label }}</td>
           </tr>
 
-          <tr v-if="app_config.shader_name != 'nada' && app_config.shader_name != 'amn1'" class="noborder">
+          <tr v-if="app_config.shader_name != 'nada' && app_config.shader_name != 'amn1' && app_config.shader_name != 'mmn1'" class="noborder">
             <td colspan="4" class="noborder"></td>
             <td >
               <input v-if="! print_mode && ! modal_recp.recp_paid" 
@@ -190,7 +190,9 @@ v-if="app_config.shader_name == 'magdy'" >
             </td>
             <td></td>
             <td></td>
-            <td class="text-danger bbordered" v-if="app_config.shader_name == 'amn1'">( {{ modal_recp.recp_comm +
+            <td class="text-danger bbordered" 
+            v-if="app_config.shader_name == 'amn1' || app_config.shader_name == 'mmn1'">
+              ( {{ modal_recp.recp_comm +
                modal_recp.total_nolon +
                modal_recp.recp_expenses + 
                modal_recp.recp_given +
@@ -205,6 +207,21 @@ v-if="app_config.shader_name == 'magdy'" >
               {{'total_disc' | tr_label}} 
             </th>
           </tr>
+
+
+          <tr v-if="app_config.shader_name == 'mmn1'">
+            <td colspan="2" class="noborder"></td>
+            <td class="noborder"> خصم </td>
+            <td >
+              <input v-if="! print_mode && ! modal_recp.recp_paid" 
+              onClick="this.select();"
+              v-model="modal_recp.recp_deducts" class="form-control" placeholder="ادخل مبلغ الخصم" >
+              <b class="border-top border-primary" v-else>
+                ( {{modal_recp.recp_deducts | round2 | toAR(true) }} )
+              </b>
+            </td>
+          </tr>
+
           <tr v-if="app_config.shader_name != 'amn1'">
             <td colspan="2" class="noborder"></td>
             <td class="noborder">صافي الفاتورة</td>
@@ -214,6 +231,7 @@ v-if="app_config.shader_name == 'magdy'" >
               </b>
             </td>
           </tr>
+
           <tr v-if="app_config.shader_name == 'amn1'">
             <td >
               <b class="border-top border-primary" >

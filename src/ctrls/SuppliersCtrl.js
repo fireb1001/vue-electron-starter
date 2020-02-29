@@ -239,6 +239,7 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
   }
 
   async permenentDeleteById(id) {
+    await knex.raw(`delete from supplier_trans where supplier_id = ${id}`);
     await knex.raw(`delete from suppliers where id = ${id}`)
   }
 
