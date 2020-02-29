@@ -143,7 +143,7 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
    group by customer_id 
    ${filter.debt_g_than ? " having sum(amount)> "+ parseInt(filter.debt_g_than) : ""}
    ) customer_trans_g
-   join
+   left join
    (select * from customers where 1=1
     ${options.softDelete ? " and deleted_at is null" : ""}
      ) customers_g

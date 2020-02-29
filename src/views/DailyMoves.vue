@@ -151,15 +151,25 @@
 
         <table class="table table-bordered mt-1 pr-hideme">
         <tr>
-          <th> العميل</th>
-          <td>{{phone}}</td>
+          <th> اجمالي مديونيات الفلاحين</th>
+          <td>{{capital_sums.supp_sum_debt | round | toAR}}</td>
 
-          <th> العميل</th>
-          <td>{{address}}</td>
+          <th> اجمالي مديونيات التجار</th>
+          <td>{{capital_sums.cust_sum_debt | round | toAR}}</td>
+
+          <th> اجمالي مديونيات التعاملات</th>
+          <td>{{capital_sums.sum_dealer_trans | round | toAR}}</td>
+
+          <th>   نقدية</th>
+          <td>{{capital_sums.net_cash | round | toAR}}</td>
+        </tr>
+        <tr>
+          <th>اجمالي فواتير الرصد</th>
+          <td>({{ capital_sums.sum_net_rasd | round | toAR }})</td>
         </tr>
         <tr>
           <th>{{'sum_capital' | tr_label}}</th>
-          <td>{{ sum_capital | round | toAR }}</td>
+          <td>{{ capital_sums.sum_capital | round | toAR }}</td>
         </tr>
       </table>
       <hr>
@@ -214,7 +224,14 @@ export default {
         sum_oncredit: null, // oncredit outgoings and also on credit cashflows paid , acc_rest
         sum_exp_no_deduct: null
       },
-      sum_capital: 0
+      capital_sums: {
+        sum_capital:0, 
+        cust_sum_debt: 0,
+        supp_sum_debt: 0, 
+        net_cash: 0,
+        sum_net_rasd: 0,
+        sum_dealer_trans: 0
+      }
     }
   },
   methods: {
@@ -239,11 +256,16 @@ export default {
     let {sum_debt: supp_sum_debt } = await new SuppliersCtrl().sumDebt()
     let [ dealer_trans ]  = await knex.raw('select sum(amount) as sum_dealer_trans from dealer_trans');
     let sum_dealer_trans = dealer_trans && dealer_trans.sum_dealer_trans ? parseFloat(dealer_trans.sum_dealer_trans) : 0
-    let net_cash = await this.cashflowCtrl.getNetCash({day: this.day.iso})
-    this.net_cash = net_cash
+    this.net_cash = await this.cashflowCtrl.getNetCash({day: this.day.iso})
     let {sum_net_rasd} = await new ReceiptsCtrl().sumNetRasd()
-
-    this.sum_capital = cust_sum_debt + supp_sum_debt + net_cash - sum_net_rasd + sum_dealer_trans
+    this.capital_sums = {
+      sum_capital: cust_sum_debt + supp_sum_debt + this.net_cash - sum_net_rasd + sum_dealer_trans,
+      cust_sum_debt: cust_sum_debt,
+      supp_sum_debt: supp_sum_debt,
+      net_cash: this.net_cash,
+      sum_net_rasd: sum_net_rasd,
+      sum_dealer_trans: sum_dealer_trans
+    }
     this.refresh_all()
   },
   computed: {
