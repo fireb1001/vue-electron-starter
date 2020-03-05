@@ -1,5 +1,25 @@
 <template>
   <section class="template m-3">
+    <h2>الفترة</h2>
+    <div class="row">
+      <div class="col-4">
+          من
+        <datetime v-model="from_day" 
+        @input="refresh_all" 
+        :auto="true"  class="datetime" 
+        min-datetime="2019-01-01">
+        </datetime>
+      </div>
+      <div class="col-4">
+        الي
+        <datetime v-model="to_day" 
+        @input="refresh_all" 
+        :auto="true"  class="datetime" 
+        min-datetime="2019-01-01">
+        </datetime>
+      </div>
+    </div>
+    <br/>
     <h2>اجماليات المصروفات</h2>
     <div class="table-responsive m-4">
       <table class="table table-striped table-sm pr-me-l">
@@ -50,6 +70,8 @@ export default {
   name: 'daily-expenses',
   data() {
     return {
+      from_day: '',
+      to_day: '',
       daily_expenses: [],
       days: [],
       ex_items: [],
@@ -62,15 +84,22 @@ export default {
       evt.preventDefault()
     },
     async refresh_all(){
+      this.daily_expenses = [];
+      let fromDateTime = this.from_day ? DateTime.fromISO(this.from_day) : null;
+      let toDateTime = this.to_day ? DateTime.fromISO(this.to_day): null;
+
       this.ex_items = await this.cashflowCtrl.getExItems();
-      console.log(this.ex_items)
       let daily_ex_by_day = {}
       // pivoting cols to rows
-      let daily_ex = await knex.raw(`
+      let query = `
         select day, state, sum(amount) sum from cashflow where state in 
         ( select name from trans_types where category = 'cashflow' and sum = '-' and map_cashflow= 'ex' )
+        ${fromDateTime ? "and day >= '"+ fromDateTime.toISODate()+"'" : ""}
+        ${toDateTime ? "and day <= '"+ toDateTime.toISODate()+"'" : ""}
         GROUP by day, state 
-      `);
+      `
+      let daily_ex = await knex.raw(query);
+      console.log(query)
       daily_ex.map( item => {
         daily_ex_by_day[item.day] = { ...daily_ex_by_day[item.day],day: item.day, [item.state]: item.sum}
       });
@@ -85,9 +114,7 @@ export default {
     async showSelected(){
      
     },
-    async change_day(){
-
-    }
+    
   },
   async mounted() {
     this.refresh_all()

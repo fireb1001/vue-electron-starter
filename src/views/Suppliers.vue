@@ -288,10 +288,10 @@ export default {
       let soft_delete = this.show_active ? true : false;
       // load 20 tasbera
       this.suppliers_arr = await this.suppliersCtrl.findAll({limit: 20},{softDelete: soft_delete, 
-        orderByBalance: this.app_config.shader_name != 'nada' && this.app_config.shader_name != 'mmn1'
+        orderByBalance: this.app_config.shader_name != 'nada'
       })
       this.suppliers_arr = await this.suppliersCtrl.findAll({},{softDelete: soft_delete, 
-        orderByBalance: this.app_config.shader_name != 'nada' && this.app_config.shader_name != 'mmn1'
+        orderByBalance: this.app_config.shader_name != 'nada'
       })
       let {sum_debt} = await this.suppliersCtrl.sumDebt()
       this.sum_debt = sum_debt

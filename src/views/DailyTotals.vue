@@ -288,6 +288,7 @@ repay_rahn
               <th v-if="show_totals.includes('recp_diff')"> {{'recp_diff' | tr_label}} </th>
               <th v-if="show_totals.includes('supp_payments')"> {{'supp_payments' | tr_label}} </th>
               <th v-if="show_totals.includes('supp_deducts')"> {{'supp_deducts' | tr_label}} </th>
+              <th v-if="show_totals.includes('rahn_incr')"> شراء عدايات  </th>
               <th v-if="show_totals.includes('rahn')"> {{'rahn' | tr_label}}  </th>
               <th v-if="show_totals.includes('repay_rahn')"> {{'رد رهن' | tr_label}} </th>
             </tr>
@@ -311,7 +312,8 @@ sum_nolon,
 sum_supp_payment,
 sum_product_rahn,
 sum_repay_rahn,
-sum_rahn_down
+sum_rahn_down,
+sum_rahn_increase
 -->
           <tbody>
             <tr v-if="app_config.shader_name == 'magdy' && ! past_init_vals">
@@ -434,6 +436,9 @@ sum_rahn_down
               <td v-if="show_totals.includes('supp_deducts')">
                 {{item.recp_sum_deducts+ item.sum_supp_collect | round }}
               </td>
+              <td v-if="show_totals.includes('rahn_incr')">
+                {{item.sum_rahn_increase | round }}
+              </td>
               <td v-if="show_totals.includes('rahn')">
                 {{item.sum_product_rahn | round }}
               </td>
@@ -477,6 +482,9 @@ sum_rahn_down
               </th>
               <th v-if="show_totals.includes('supp_deducts')">
                 {{sum_totals.sum_supp_deducts  | round}}
+              </th>
+              <th v-if="show_totals.includes('rahn_incr')">
+                {{sum_totals.sum_rahn_incr | round}}
               </th>
               <th v-if="show_totals.includes('rahn')">
                 {{sum_totals.sum_product_rahn | round}}
@@ -589,7 +597,7 @@ export default {
   },
   mixins:[MainMixin],
   methods: {
-        async show_dialog() {
+    async show_dialog() {
       if(this.shader_configs['F_MMN1_PASS']) {
         this.$bvModal.show("pass-in");
       } else {
@@ -768,7 +776,7 @@ export default {
     if(! this.shader_configs['F_MMN1_PASS'])
       this.flags.show_totals_confirm = true
     this.show_totals = this.shader_configs['show_totals'] ? this.shader_configs['show_totals'] : ''
-    this.show_totals = this.show_only == 'rahn' ? 'rahn,repay_rahn' : this.show_totals
+    this.show_totals = this.show_only == 'rahn' ? 'rahn,repay_rahn,rahn_incr' : this.show_totals
     this.show_totals = this.show_only == 'revenue' ? 'comms,recp_diff,out_cashflow,net_income_no_diff' : this.show_totals
     this.refresh_all()
   },
@@ -787,6 +795,7 @@ export default {
         sum_supp_deducts: 0,
         sum_product_rahn: 0,
         sum_repay_rahn: 0,
+        sum_rahn_incr: 0,
         sum_net_income: 0
       }
 
@@ -818,6 +827,7 @@ export default {
         sum_totals.sum_supp_deducts += one.recp_sum_deducts + one.sum_supp_collect 
         sum_totals.sum_product_rahn += one.sum_product_rahn
         sum_totals.sum_repay_rahn += one.sum_repay_rahn + one.sum_rahn_down
+        sum_totals.sum_rahn_incr += one.sum_rahn_increase
         sum_totals.sum_net_income += one.recp_sum_comm + one.out_sell_comm + (one.sum_out_value - one.recp_sum_sale) - one.sum_deducts
       })
       return sum_totals

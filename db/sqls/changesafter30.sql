@@ -1,9 +1,10 @@
+-- 1.47
+update "shader_configs" set config_value='1.47' where config_name = 'MANUAL_UPGRADED_TO';
+-- ## update views
 
-update "shader_configs" set config_value='1.46' where config_name = 'MANUAL_UPGRADED_TO';
 -- 1.46
 
 -- 1.45 
--- views
 
 -- (only 4 mmn1)
 delete from customer_trans where customer_id not in (select id from customers);

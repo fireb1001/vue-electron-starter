@@ -59,6 +59,21 @@
             عرض 
           </div>
         </div>
+
+        <div v-if="app_config.shader_name  != 'magdy'" class="row detailed" v-b-modal.modal-deducts>
+          <div class="col-6">
+            <span class="btn text-primary">
+            {{ 'خصم من الفاتورة' | tr_label }}
+            </span>
+          </div>
+          <div class="col-6 btn text-primary">
+            <span >
+            {{ recp_deducts_dao.amount | round2 }}
+            </span>
+            <span class="fa fa-table"></span>
+            عرض 
+          </div>
+        </div>
       </div>
       <div class=" col-7" >
         <h3>اجماليات البيع من وارد اليوم </h3>
@@ -392,11 +407,44 @@
   </div>
 </b-modal>
 
+<!-- deducts Modal -->
+<b-modal id="modal-deducts"  
+ hide-footer hide-header-close hide-backdrop>
+  <template slot="modal-title">
+    عرض خصم من فواتير اليوم للفلاح
+  </template>
+  <table class="table table-striped table-sm pr-me">
+    <thead>
+      <tr>
+        <th>المبلغ</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-if="recp_deducts_dao">
+        <td>{{recp_deducts_dao.amount}}</td>
+        <td>
+          <input v-model="recp_deducts_dao.amount" class="form-control"  >
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="m-2">
+    <button class="btn btn-success pr-hideme"
+    :disabled="day.stricted"
+     @click="$bvModal.hide('modal-deducts');saveDeducts()" >
+      <span class="fa fa-check "></span> &nbsp;
+      حفظ
+    </button>
+  </div>
+</b-modal>
+
 <!-- expenses Modal -->
 <b-modal id="modal-expenses"  
  hide-footer hide-header-close hide-backdrop>
   <template slot="modal-title">
-    عرض خصم من فواتير اليوم للفلاح
+    عرض دفعة نقدية من فواتير اليوم للفلاح
   </template>
   <table class="table table-striped table-sm pr-me">
     <thead>
@@ -772,8 +820,9 @@ export default {
       outgoings_sums:[],
       total_nolon: 0,
       recp_expenses: 0,
-      recp_expenses_dao: new CashflowDAO({}),
       recp_deducts: 0,
+      recp_expenses_dao: new CashflowDAO({}),
+      recp_deducts_dao: {amount: 0},
       inc_headers: [],
       today_nolons: [],
       recp_in_sums: {},
@@ -813,6 +862,7 @@ export default {
         amount: 0
       })
       this.recp_expenses = this.recp_expenses_dao.amount 
+      
       this.outgoings_sums = await this.outgoingsCtrl.findSuppDaySums({supplier_id: this.supplier_id, day: this.recp_day})
       this.inc_headers = await this.inoutHeadCtrl.findAll({supplier_id: this.supplier_id, day: this.recp_day})
       let receipts = await this.receiptsCtrl.findAll({supplier_id: this.supplier_id, day: this.recp_day})
@@ -833,6 +883,9 @@ export default {
           amount: 0
         }))
       }
+
+      // NOW set recp_deducts_dao amount
+      this.recp_deducts_dao.amount = this.recp_1.recp_deducts ? this.recp_1.recp_deducts : 0 ;
     },
     async recp_changed(){
 
@@ -899,7 +952,7 @@ export default {
         let receipt = new ReceiptDAO({
           ...this.recp_1,
           day: this.recp_day,
-          supplier_id: this.supplier_id,
+          supplier_id: this.supplier_id
         })
         await this.receiptsCtrl.save(receipt)
       } else if (this.recp_1.id) {
@@ -944,6 +997,11 @@ export default {
       this.recp_expenses_dao.income_day =  this.recp_day
       this.recp_expenses_dao.supplier_id = this.supplier_id
       await this.cashflowCtrl.save(this.recp_expenses_dao)
+      this.refresh_all()
+    },
+    async saveDeducts(){
+      this.recp_1.recp_deducts = parseFloat(this.recp_deducts_dao.amount)
+      await this.saveAll()
       this.refresh_all()
     },
     async addReceipt(num){
