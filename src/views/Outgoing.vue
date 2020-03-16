@@ -139,6 +139,7 @@
     </div>
   </div>
 
+
   <div class="form-group row">
     <label for="notes1" class="col-sm-3">اسم البياع</label>
     <div class="col-sm-9">
@@ -159,6 +160,19 @@
     :key="outgoing_form.customer_id">
       <div slot="no-options">لا يوجد نتائج بحث <span class="text-primary" @click="new_customer('new')">انشاء جديد</span></div>
     </v-select>
+    </div>
+  </div>
+
+  <div v-if="app_config.shader_name == 'mmn1'">
+    <button 
+    v-if="! show_insert_form"
+    @click="show_insert_form = true"
+    type="button" class="btn btn-primary" >ادخال بائع</button> 
+    <div v-if="show_insert_form">
+      <form @submit="insertCustomer">
+        <input v-model="insert_customer_name" class="form-control"  >
+        <button type="submit" class="btn btn-success" > ادخال </button>
+      </form>
     </div>
   </div>
 
@@ -315,6 +329,8 @@ export default {
       confirm_step: [],
       confirm_step_rest: [],
       discard_success: false,
+      show_insert_form: false,
+      insert_customer_name: '',
       search_term_incomings: ''
     }
   },
@@ -323,6 +339,15 @@ export default {
   },
   mixins: [MainMixin],
   methods: {
+    async insertCustomer(evt){
+      evt.preventDefault()
+      console.log(this.insert_customer_name)
+      let new_customer_id = await new CustomersCtrl().save(new CustomerDAO({name: this.insert_customer_name }))
+      this.active_customers = await this.customersCtrl.findAll({},{softDelete: true})
+      this.outgoing_form.customer_id = new_customer_id
+      this.insert_customer_name = ''
+      this.show_insert_form = false
+    },
     async saveOutgoing(evt){
       this.submited = true
       evt.preventDefault()
