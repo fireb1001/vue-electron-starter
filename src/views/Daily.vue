@@ -7,7 +7,7 @@
     @input="change_luxon_date" 
     :auto="true" 
     class="datetime" 
-    min-datetime="2019-01-01"
+    min-datetime="2019-10-31"
     :max-datetime="max_datetime">
     </datetime>
   </section>
@@ -35,9 +35,9 @@ export default {
     }
   },
   mounted () {
-    if(this.$store.state.shader_configs && this.$store.state.shader_configs['demo_till']) {
-      console.log(this.$store.state.shader_configs['demo_till'])
-      let day = DateTime.fromMillis(parseInt(this.$store.state.shader_configs['demo_till']) * 1000)
+    if(this.$store.state.shader_configs && this.$store.state.shader_configs['till_val']) {
+      console.log(this.$store.state.shader_configs['till_val'])
+      let day = DateTime.fromMillis(parseInt(this.$store.state.shader_configs['till_val']) * 1000)
       this.max_datetime = day.toISODate()
     }
     // this.luxon_date = DateTime.fromISO(this.$store.state.day.iso).toString()

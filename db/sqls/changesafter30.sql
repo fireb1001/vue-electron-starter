@@ -1,8 +1,11 @@
--- 1.47
-update "shader_configs" set config_value='1.47' where config_name = 'MANUAL_UPGRADED_TO';
--- ## update views
+-- 1.49
+-- ## add till_val instead of dome_till
+-- validate till_val using 
+-- "mmn1".split('').map(x => ! isNaN(x) ? + x: x.charCodeAt(0)).reduce((a,b) => a+b);
 
--- 1.46
+-- 1.47
+update "shader_configs" set config_value='1.49' where config_name = 'MANUAL_UPGRADED_TO';
+-- ## update views
 
 -- 1.45 
 

@@ -3,9 +3,9 @@
   <div class="m-3">
     <h1 class="m-1 text-center">نظام وكالة الخضار والفاكهة</h1>
     <h2 class="text-danger"> اصدار رقم {{app_version}}</h2>
-    <div v-if="! shader_configs['demo_hide']" >
-      <h3 class="text-danger" v-if="shader_configs['demo_till'] != 'open'">* نسخة تجريبية حتي 
-        {{ this.shader_configs['demo_till'] * 1000  | arDate}}
+    <div v-if="! shader_configs['till_hide']" >
+      <h3 class="text-danger" v-if="shader_configs['till_val'] != 'open'">* نسخة تجريبية حتي 
+        {{ this.shader_configs['till_val'] * 1000  | arDate}}
       </h3>
       <h3 class="text-success" v-else>* نسخة مرخصة</h3>
     </div>

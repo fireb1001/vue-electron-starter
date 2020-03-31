@@ -277,6 +277,23 @@ export default {
 
     let shader_conf = await this.shaderConfigsCtrl.getAppCongifs();
     this.$store.commit(MyStoreMutations.setShaderConfigs, shader_conf);
+  
+    let till_val = + shader_conf['till_val'];
+    if(! till_val ) {
+      window.alert("!");
+      return 
+    } else {
+      // verify till_val
+      let [verify] = await knex.raw(`select config_verify as verify from shader_configs where config_name = 'till_val'`)
+      console.log(verify['verify'],shader_conf['shader_name'], verify['verify'], undefined);
+      let should_be = till_val + + shader_conf['shader_name'].split('').map(x => ! isNaN(x) ? + x: x.charCodeAt(0)).reduce((a,b) => a+b);
+      console.log(verify['verify'], "should_be00-" + should_be)
+      if(+ verify['verify'] != should_be) {
+        window.alert("!");
+        return 
+      }
+    }
+
     this.require_login = shader_conf["require_login"]
       ? shader_conf["require_login"]
       : false;

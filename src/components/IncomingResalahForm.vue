@@ -135,10 +135,16 @@ export default {
       evt.preventDefault()
       // let ids =
       // console.log(this.incomings_data)
-      let refreshpay = this.shader_configs['refreshpay'] ? parseInt(this.shader_configs['refreshpay']) : null
+
+      let till_val = this.shader_configs['till_val'] ? parseInt(this.shader_configs['till_val']) : null
       const moment = require('moment')
-      if(refreshpay && refreshpay < moment(this.incomings_data.day).unix()) {
-        alert('يوجد مشكلة بتاريخ الجهاز ')
+      // disable prev years
+      if(moment(this.incomings_data.day).unix() < moment("2019-10-10").unix()) {
+        alert('! -')
+        return
+      }
+      else if(till_val && till_val < moment(this.incomings_data.day).unix()) {
+        alert('! +')
         return
       }
       else {
