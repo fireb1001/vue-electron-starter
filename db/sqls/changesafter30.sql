@@ -1,13 +1,20 @@
--- 1.49
+
+-- R 1.41 
 -- ## add till_val instead of dome_till
 -- validate till_val using 
 -- "mmn1".split('').map(x => ! isNaN(x) ? + x: x.charCodeAt(0)).reduce((a,b) => a+b);
 
--- 1.47
-update "shader_configs" set config_value='1.49' where config_name = 'MANUAL_UPGRADED_TO';
--- ## update views
+update "shader_configs" set config_value='1.41' where config_name = 'MANUAL_UPGRADED_TO';
+
+-- for amn1
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
+VALUES ('till_val', '1591446827', '1591447144', 'amn1', 'config');
+
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+VALUES ('till_hide', 'true', '', 'amn1', 'config');
 
 -- 1.45 
+-- ## update views
 
 -- (only 4 mmn1)
 delete from customer_trans where customer_id not in (select id from customers);
