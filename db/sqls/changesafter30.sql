@@ -1,4 +1,7 @@
 
+-- R 1.42
+-- ## Add alwasit logo 
+ALTER TABLE suppliers add side_acc REAL;
 -- R 1.41 
 -- ## add till_val instead of dome_till
 -- validate till_val using 

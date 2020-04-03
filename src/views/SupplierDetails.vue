@@ -23,6 +23,7 @@
     </section>
     <section class="row">
       <div class="col-5 pr-hideme">
+
         <div class="m-2" v-if="supplier.box_count">
           <h4>لديه {{supplier.box_count}} عداية</h4>
         </div>
@@ -55,6 +56,44 @@
           </button>
 
           <button type="button" class="btn btn-danger mr-1"  v-b-toggle.collapse_boxes >  اغلاق</button>
+          </form>
+        </div>
+      </b-collapse>
+
+      <br/>
+
+        <div class="m-2" v-if="supplier.side_acc">
+          <h4>حساب كراسة {{supplier.side_acc}} </h4>
+        </div>
+        <button 
+        v-if="shader_configs['shader_name'] != 'nada'"
+        v-b-toggle.collapse_side_acc class=" btn btn-success m-2" >
+          <span class="fa fa-box"></span> &nbsp; 
+        اضافة /تخفيض علي حساب الكراسة
+        </button>
+      <b-collapse id="collapse_side_acc" style="padding:25px;" class="pr-hideme">
+        <div class="entry-form">
+          <form  @submit="addToSideAcc">
+          <b-form-group label=" الحركة">
+            <b-form-radio-group  v-model="side_acc.type">
+              <b-form-radio value="+">اضافة </b-form-radio>
+              <b-form-radio value="-"> تخفيض</b-form-radio>
+            </b-form-radio-group>
+          </b-form-group>
+
+          <div class="form-group row">
+            <label  class="col-sm-2">المبلغ</label>
+            <div class="col-sm-10">
+              <input v-model="side_acc.amount" class="form-control "  placeholder="ادخل المبلغ">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success" >
+            <span v-if="side_acc.type == '+'">اضافة</span>
+            <span v-else>تخفيض</span>
+          </button>
+
+          <button type="button" class="btn btn-danger mr-1"  v-b-toggle.collapse_side_acc >  اغلاق</button>
           </form>
         </div>
       </b-collapse>
@@ -309,6 +348,7 @@ export default {
       confirm_step_recp: [],
       confirm_step: [],
       add_box_count:{amount:0, type:'+'},
+      side_acc:{amount:0, type:'+'},
       suppliersCtrl: new SuppliersCtrl(),
       trans_form: {trans_type: 'supp_payment'},
       yearly_closer: {year: new Date().getFullYear()}
@@ -371,6 +411,17 @@ export default {
       await this.suppliersCtrl.save(this.supplier)
       this.add_box_count = {amount : 0 , type : '+'}
       this.$root.$emit('bv::toggle::collapse', 'collapse_boxes')
+      await this.refresh_all()
+    },
+    async addToSideAcc(evt){
+      evt.preventDefault()
+      console.log(this.side_acc)
+      let old_side_acc = this.supplier.side_acc ? parseFloat(this.supplier.side_acc) : 0
+      let amount = parseFloat(this.side_acc.amount);
+      this.supplier.side_acc = this.side_acc.type == '-' ? old_side_acc - amount : old_side_acc + amount
+      await this.suppliersCtrl.save(this.supplier)
+      this.side_acc = {amount : 0 , type : '+'}
+      this.$root.$emit('bv::toggle::collapse', 'collapse_side_acc')
       await this.refresh_all()
     },
     async addPayments(evt){

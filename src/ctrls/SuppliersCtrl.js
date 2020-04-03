@@ -14,6 +14,7 @@ export class SupplierDAO {
   //is_self
   deleted_at
   box_count
+  side_acc
 
   sum_debt
   sum_net_rasd
