@@ -119,6 +119,8 @@
         اختيار للطباعة   &nbsp; <span class="fa fa-external-link-square-alt"></span>
       </button>
 
+      <button class="btn btn-primary pr-hideme m-2" v-if="flags.detailed === false" @click="flags.detailed= true"> عرض التفاصيل </button>
+        
     </div>
     <div class="pr-hideme" >
       <br>
@@ -137,7 +139,8 @@
               <td></td>
               <th> الكود </th>
               <th>الاسم</th>
-              <th>ملاحظات</th>
+              <th >ملاحظات</th>
+              <th v-if="flags.detailed ">كراسة</th>
               <th>رصيد</th>
               
               <th>{{'sum_rasd' | tr_label}}</th>
@@ -153,7 +156,8 @@
                   {{item.name}}
                 </router-link>
                </td>
-              <td>{{item.notes}}</td>
+              <td >{{item.notes}}</td>
+              <td v-if="flags.detailed ">{{item.side_acc}}</td>
               <td>{{item.sum_debt | round | toAR}}</td>
               <td>{{item.sum_net_rasd | round | toAR}}</td>
               <td class="d-print-none">

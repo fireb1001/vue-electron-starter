@@ -60,17 +60,25 @@
         </div>
       </b-collapse>
 
+    <div v-if="shader_configs['shader_name'] == 'mmn1'">
       <br/>
-
+        <div class="m-2" @click="flags.show_side_acc = !flags.show_side_acc">
+          <h6>
+            <span v-if="flags.show_side_acc">اخفاء</span>
+            <span v-if="! flags.show_side_acc">عرض</span>
+           كراسة </h6>
+        </div>
+      <div class="m-2" v-if="flags.show_side_acc">
         <div class="m-2" v-if="supplier.side_acc">
           <h4>حساب كراسة {{supplier.side_acc}} </h4>
         </div>
-        <button 
-        v-if="shader_configs['shader_name'] != 'nada'"
-        v-b-toggle.collapse_side_acc class=" btn btn-success m-2" >
+        <button v-b-toggle.collapse_side_acc class=" btn btn-success m-2" >
           <span class="fa fa-box"></span> &nbsp; 
         اضافة /تخفيض علي حساب الكراسة
         </button>
+      </div>
+    </div>
+    
       <b-collapse id="collapse_side_acc" style="padding:25px;" class="pr-hideme">
         <div class="entry-form">
           <form  @submit="addToSideAcc">
@@ -283,7 +291,7 @@
             <tr v-for="(receipt, idx) in supplier_receipts" :key='idx' >
               <th>{{idx +1 | toAR }}</th>
               <td>
-                {{receipt.net_value | round2 | toAR}}
+                {{receipt.net_value | ceil5(app_config.shader_name) | round | toAR}}
               </td>
               <td>{{receipt.total_count | toAR}}</td>
               <td width="35%">{{receipt.products_arr | productsFilter }}</td>
@@ -309,7 +317,7 @@
             </tr>
           </tbody>
         </table>
-        <div class="m-3">اجمالي فواتير الرصد فقط = <b>{{supp_recps_sums.total_rasd | round2 | toAR}}</b> </div>
+        <div class="m-3">اجمالي فواتير الرصد فقط = <b>{{ supp_recps_sums.total_rasd | ceil5(app_config.shader_name) | round | toAR}}</b> </div>
         <div class="text-center">
         <button class="btn btn-printo pr-hideme"  @click="print_co">
           <span class="fa fa-print"></span> طباعة
@@ -347,6 +355,7 @@ export default {
       store_day: this.$store.state.day,
       confirm_step_recp: [],
       confirm_step: [],
+      flags: {show_side_acc: false},
       add_box_count:{amount:0, type:'+'},
       side_acc:{amount:0, type:'+'},
       suppliersCtrl: new SuppliersCtrl(),

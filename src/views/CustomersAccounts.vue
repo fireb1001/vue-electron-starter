@@ -208,8 +208,8 @@ hide-header hide-footer hide-header-close hide-backdrop>
         <hr/>
         <h3 class="text-center" v-if="daily_out_trans[0]">
           {{'total_debt' | tr_label}} 
-          : {{ customer.debt | ceil5(app_config.shader_name) | toAR}}</h3>
-
+          : {{sum_debt_cmpt | ceil5(app_config.shader_name) | toAR}}</h3>
+          
       </div>
       <span></span>
 
@@ -251,6 +251,7 @@ export default {
       outg_day: {},
       daily_out_trans: [],
       customer: {},
+      customer_trans: [],
       kashf_header: '',
       d_collect_form: {
         id: null,
@@ -297,20 +298,19 @@ export default {
       });
     },
     async showOutModal(customer_id) {
-
+      this.customer_trans = [];
       this.d_collect_form = {trans_type: "cust_collecting"}
       this.d_down_rahn_form = {trans_type: "repay_rahn_internal"}
       this.msh_collect_form = {trans_type: "mashal"}
       this.aarbon_form = {trans_type: "aarbon"}
 
       this.customer = await this.customersCtrl.findOne(customer_id);
-
+      this.customer_trans = await this.customersCtrl.getCustomerTrans({id: customer_id})
       this.outg_day = this.day.iso;
       this.daily_out_trans = await this.customersCtrl.getDailyOutTrans({
         id: customer_id,
         day: this.outg_day
       });
-      console.log(this.daily_out_trans)
       let filtered_incollect = this.daily_out_trans.filter(
         item => item.trans_type === "cust_in_collecting"
       );
@@ -447,6 +447,13 @@ export default {
         sum += parseFloat(item.amount);
       });
       return sum;
+    },
+    sum_debt_cmpt: function() {
+      let sum_debt = 0
+      this.customer_trans.forEach( trans => {
+        sum_debt += parseFloat(trans.amount)
+      })
+      return sum_debt
     }
   },
   mounted() {

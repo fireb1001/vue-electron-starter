@@ -702,7 +702,7 @@ v-if="app_config.shader_name == 'magdy'" >
             <td class="noborder">صافي الفاتورة</td>
             <td >
               <b class="border-top border-primary" >
-                {{modal_recp.net_value | ceil5(app_config.shader_name) | round | toAR }}
+                {{ modal_recp.net_value | ceil5(app_config.shader_name) | round | toAR }}
               </b>
             </td>
           </tr>

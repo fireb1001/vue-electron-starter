@@ -47,6 +47,51 @@
     حركة نقدية : تحصيل / امانة 
   </button> 
 
+  <div v-if="shader_configs['shader_name'] == 'mmn1'">
+      <br/>
+        <div class="m-2" @click="flags.show_side_acc = !flags.show_side_acc">
+          <h6>
+            <span v-if="flags.show_side_acc">اخفاء</span>
+            <span v-if="! flags.show_side_acc">عرض</span>
+           كراسة </h6>
+        </div>
+      <div class="m-2" v-if="flags.show_side_acc">
+        <div class="m-2" v-if="customer.side_acc">
+          <h4>حساب كراسة {{customer.side_acc}} </h4>
+        </div>
+        <button v-b-toggle.collapse_side_acc class=" btn btn-success m-2" >
+          <span class="fa fa-box"></span> &nbsp; 
+        اضافة /تخفيض علي حساب الكراسة
+        </button>
+      </div>
+  </div>
+
+        <b-collapse id="collapse_side_acc" style="padding:25px;" class="pr-hideme">
+        <div class="entry-form">
+          <form  @submit="addToSideAcc">
+          <b-form-group label=" الحركة">
+            <b-form-radio-group  v-model="side_acc.type">
+              <b-form-radio value="+">اضافة </b-form-radio>
+              <b-form-radio value="-"> تخفيض</b-form-radio>
+            </b-form-radio-group>
+          </b-form-group>
+
+          <div class="form-group row">
+            <label  class="col-sm-2">المبلغ</label>
+            <div class="col-sm-10">
+              <input v-model="side_acc.amount" class="form-control "  placeholder="ادخل المبلغ">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success" >
+            <span v-if="side_acc.type == '+'">اضافة</span>
+            <span v-else>تخفيض</span>
+          </button>
+
+          <button type="button" class="btn btn-danger mr-1"  v-b-toggle.collapse_side_acc >  اغلاق</button>
+          </form>
+        </div>
+      </b-collapse>
 
   <div>
     <h3>عرض الحركات من يوم</h3>
@@ -171,6 +216,7 @@
             trans.trans_type != 'coll_anti_rahn' &&
             trans.trans_type != 'repay_rahn_auto' &&
             trans.trans_type != 'add_rahn_auto' &&
+            trans.trans_type != 'repay_rahn_cash' &&
             trans.trans_type != 'cust_add_rahn' &&
             ! show_trans_after || 
             Date.parse(trans.day) >= Date.parse(show_trans_after)
@@ -383,7 +429,9 @@ hide-header hide-footer hide-header-close hide-backdrop>
 
       <div class="col-6" v-if="shader_configs['F_SHOW_DEBT_KASHF']">
         <hr/>
-        <h3 class="text-center" v-if="daily_out_trans[0]"> {{'total_debt' | tr_label}} : {{sum_debt_cmpt | ceil5(app_config.shader_name) | toAR}}</h3>
+        <h3 class="text-center" v-if="daily_out_trans[0]"> 
+          {{'total_debt' | tr_label}} : {{sum_debt_cmpt | ceil5(app_config.shader_name) | toAR}}
+        </h3>
       </div>
 
       <span></span>
@@ -437,7 +485,8 @@ export default {
       customer_id: this.$route.params.id,
       transtypes_labels: this.$store.state.transtypes_arr,
       confirm_step: [],
-      flags: {modal_closed: true, show_cust_det: false },
+      flags: {modal_closed: true, show_cust_det: false, show_side_acc: false},
+      side_acc:{amount:0, type:'+'},
       discard_success: false,
       sell_rest: {actual_sale: 0 , notes: ''},
       outg_day: {},
@@ -494,6 +543,17 @@ export default {
         this.aarbon_form.id = fltr_aarbon[0].id
       }
       this.$bvModal.show('modal-daily')
+    },
+    async addToSideAcc(evt){
+      evt.preventDefault()
+      console.log(this.side_acc)
+      let old_side_acc = this.customer.side_acc ? parseFloat(this.customer.side_acc) : 0
+      let amount = parseFloat(this.side_acc.amount);
+      this.customer.side_acc = this.side_acc.type == '-' ? old_side_acc - amount : old_side_acc + amount
+      await this.customersCtrl.save(this.customer);
+      this.side_acc = {amount : 0 , type : '+'}
+      this.$root.$emit('bv::toggle::collapse', 'collapse_side_acc')
+      await this.getCustomerDetails();
     },
     async modalSave(evt){
       if(! this.d_collect_form.id && this.d_collect_form.amount ) {
@@ -588,6 +648,18 @@ export default {
           newCashflow.transType = cashflowTrans
           let cashflowCtrl = new CashflowCtrl()
           cashflow_id = await cashflowCtrl.save(newCashflow)
+
+          if( selectedTrans.map_cashflow == 'cust_discount') {
+            let cashflowTrans = await this.transTypesCtrl.findOne({name: 'anti_cust_discount' , category: 'cashflow'});
+            let newCashflow = new CashflowDAO({
+              amount: trans_form.amount,
+              day: this.$store.state.day.iso,
+              customer_id: this.customer_id,
+            });
+
+            newCashflow.transType = cashflowTrans
+            await new CashflowCtrl().save(newCashflow);
+          }
         }
 
         let custtransDAO = new CustomerTransDAO(trans_form)

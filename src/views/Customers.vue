@@ -138,9 +138,11 @@
         اختيار للطباعة   &nbsp; <span class="fa fa-external-link-square-alt"></span>
       </button>
 
-        <button class="btn btn-printo pr-hideme mr-2"  @click="print_co">
+        <button class="btn btn-printo pr-hideme m-2"  @click="print_co">
           <span class="fa fa-print"></span> طباعة
         </button>
+
+        <button class="btn btn-primary pr-hideme m-2" v-if="flags.detailed === false" @click="flags.detailed= true"> عرض التفاصيل </button>
     </div>
     <div class="pr-hideme" >
       <br>
@@ -184,6 +186,7 @@
               <th v-if="false"> calc مديونية</th>
               <th v-if=" flags.zm_mode" width="25%">تحصيل</th>
               <th v-if="false">ملاحظات</th>
+              <th v-if="flags.detailed">كراسة</th>
               <th></th>
             </tr>
           </thead>
@@ -204,6 +207,7 @@
                 <span class="collect-box "></span>
               </td>
               <td v-if="false">{{item.notes}}</td>
+              <td v-if="flags.detailed">{{item.side_acc}}</td>
 
               <td v-if="! flags.zm_mode" class="d-print-none">
                 <button class="btn text-danger" @click="archive(item.id)" v-if=" flags.detailed && ! item.deleted_at">

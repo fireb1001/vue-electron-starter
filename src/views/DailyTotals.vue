@@ -230,7 +230,7 @@ repay_rahn
   </div>
 </b-modal>
 
-    <!-- expenses Modal -->
+    <!-- given Modal -->
 <b-modal id="modal-recpgiven"  
  hide-footer hide-header-close hide-backdrop>
   <template slot="modal-title">
@@ -264,6 +264,46 @@ repay_rahn
     <button class="btn btn-primary pr-hideme"
     :disabled="day.stricted"
      @click="$bvModal.hide('modal-recpgiven');saveRecpgiven(false)" >
+      <span class="fa fa-check "></span> &nbsp;
+      تم الصرف مسبقاً
+    </button>
+  </div>
+</b-modal>
+
+  <!-- mashal Modal -->
+<b-modal id="modal-mashal"  
+ hide-footer hide-header-close hide-backdrop>
+  <template slot="modal-title">
+    صرف المشال  ليوم {{mashal_form.day | arDate}}
+  </template>
+  <table class="table table-striped table-sm pr-me">
+    <thead>
+      <tr>
+        <th>المبلغ</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr >
+        <td>{{mashal_form.amount}}</td>
+        <td>
+          <input v-model="mashal_form.amount" class="form-control"  >
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="m-2">
+    <button class="btn btn-success pr-hideme"
+    :disabled="day.stricted"
+     @click="$bvModal.hide('modal-mashal');saveMashalOut()" >
+      <span class="fa fa-money-check-alt "></span> &nbsp;
+      صرف
+    </button>
+    <span>&nbsp;</span>
+    <button class="btn btn-primary pr-hideme"
+    :disabled="day.stricted"
+     @click="$bvModal.hide('modal-mashal');saveMashalOut(false)" >
       <span class="fa fa-check "></span> &nbsp;
       تم الصرف مسبقاً
     </button>
@@ -396,7 +436,7 @@ sum_rahn_increase
               </td>
               <td v-if="show_totals.includes('recp_given')">
                 <span 
-                :class="{'text-success': recpgiven_paid_days[item.day], 'font-weight-bold': recpgiven_paid_days[item.day]}" 
+                :class="{'text-primary': ! recpgiven_paid_days[item.day],'text-success': recpgiven_paid_days[item.day], 'font-weight-bold': recpgiven_paid_days[item.day]}" 
                 @click="showRecpgivenModal(item.recp_sum_given, item.day)">
                 {{item.recp_sum_given | round }}
                 </span>
@@ -409,7 +449,11 @@ sum_rahn_increase
               </td>
 
               <td v-if="show_totals.includes('recp_others')">
+                <span 
+                :class="{ 'text-primary':!mashal_paid_days[item.day], 'text-success': mashal_paid_days[item.day], 'font-weight-bold': mashal_paid_days[item.day]}" 
+                @click="showMashaloutModal(item.recp_sum_others, item.day)">
                 {{item.recp_sum_others | round }}
+                </span>
               </td>
               <td v-if="show_totals.includes('out_cashflow')">
                 {{item.sum_deducts | round }}
@@ -417,7 +461,7 @@ sum_rahn_increase
               <!-- Not inlude recp diff for mmn1 -->
               <td v-if="show_totals.includes('net_income_no_diff')" >
                 <span 
-                :class="{'text-success': netinc_paid_days[item.day], 'font-weight-bold': netinc_paid_days[item.day]}" 
+                :class="{'text-primary': ! netinc_paid_days[item.day], 'text-success': netinc_paid_days[item.day], 'font-weight-bold': netinc_paid_days[item.day]}" 
                 @click="showIncomeModal(item.recp_sum_comm + item.out_sell_comm - item.sum_deducts, item.day)">
                 {{item.recp_sum_comm + item.out_sell_comm - item.sum_deducts | round }}
                 </span>
@@ -591,8 +635,10 @@ export default {
       all_fukn_expenses: [],
       netincom_form: {day: '', amount: 0},
       recpgiven_form: {day: '', amount: 0},
+      mashal_form: {day: '', amount: 0},
       netinc_paid_days: {},
-      recpgiven_paid_days: {}
+      recpgiven_paid_days: {},
+      mashal_paid_days: {}
     }
   },
   mixins:[MainMixin],
@@ -631,6 +677,25 @@ export default {
       json = { ...json, recpgiven_out: true}
       await knex.raw(`update daily_close set json='${JSON.stringify(json)}' where day='${day}' `)
       this.recpgiven_form = {day: '', amount : 0}
+      await this.refresh_all()
+    },
+    async saveMashalOut(cashflow = true){
+      let {day, amount}  = this.mashal_form
+      if(cashflow) {
+        await new CashflowCtrl().save(new CashflowDAO({
+          amount: amount,
+          day: this.day.iso,
+          state: 'expenses',
+          sum: '-',
+          notes: 'صرف مشال ليوم '+day
+        }))
+      }
+      // save daily flag
+      let [{json}] = await knex.raw(`select json from daily_close where day='${day}' `)
+      if(json) json = JSON.parse(json)
+      json = { ...json, mashal_out: true}
+      await knex.raw(`update daily_close set json='${JSON.stringify(json)}' where day='${day}' `)
+      this.mashal_form = {day: '', amount : 0}
       await this.refresh_all()
     },
     async saveNetincome(cashflow = true) {
@@ -675,6 +740,12 @@ export default {
 
       this.$bvModal.show('modal-recpgiven')
     },
+    async showMashaloutModal(amount, day){
+      this.mashal_form.day = day
+      this.mashal_form.amount = Math.round(amount)
+
+      this.$bvModal.show('modal-mashal')
+    },
     async showIncomeModal(amount, day) {
       console.log(amount, day)
       this.netincom_form.day = day
@@ -715,12 +786,16 @@ export default {
 
       let netinc_paid_days = await knex.raw(`select day from daily_close where json like '%"income_out":"true"%' or  json like '%"income_out":true%'`);
       let recpgiven_days = await knex.raw(`select day from daily_close where json like '%"recpgiven_out":"true"%' or  json like '%"recpgiven_out":true%'`);
+      let mashalout_days = await knex.raw(`select day from daily_close where json like '%"mashal_out":"true"%' or  json like '%"mashal_out":true%'`);
       let all = {}
       let all_recpgiven = {}
+      let all_mashalout = {}
       netinc_paid_days.forEach(i => all[i.day] = true)
       recpgiven_days.forEach(i => all_recpgiven[i.day] = true)
+      mashalout_days.forEach(i => all_mashalout[i.day] = true)
       this.netinc_paid_days = all
       this.recpgiven_paid_days = all_recpgiven
+      this.mashal_paid_days = all_mashalout
       console.log(this.netinc_paid_days)
     },
     async change_today_date(date){

@@ -276,7 +276,17 @@ ORDER BY day
   async getCustomerNetRahn(filter = { id: null }) {
     let results = await knex.raw(`select sum( amount ) net_rahn 
     from customer_trans where customer_id = ${filter.id}
-    and trans_type in ('repay_cust_rahn', 'repay_rahn_in' , 'rahn_down' ,'product_rahn_external', 'product_rahn', 'repay_rahn_internal','repay_rahn_auto','add_rahn_auto')
+    and trans_type in (
+      'repay_cust_rahn',
+      'repay_rahn_in',
+      'rahn_down',
+      'product_rahn_external',
+      'product_rahn',
+      'repay_rahn_internal',
+      'repay_rahn_auto',
+      'add_rahn_auto',
+      'repay_rahn_cash'
+    )
 `);
     let net_rahn = results && results.length > 0 ? results[0].net_rahn : 0;
     return net_rahn;

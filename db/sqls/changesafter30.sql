@@ -1,4 +1,16 @@
+-- 1.55
+-- for nada
+update "shader_configs" set config_value='1.55' where config_name = 'MANUAL_UPGRADED_TO';
 
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+VALUES ('till_val', '1902769254', '1902769658', 'nada', 'config');
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+VALUES ('till_hide', 'true', '', 'nada', 'config');
+
+INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category") 
+VALUES ('anti_cust_discount', 'تعويض خصم التاجر', 'default', '+', '', 'cashflow');
+
+ALTER TABLE customers add side_acc REAL;
 -- R 1.42
 -- ## Add alwasit logo 
 ALTER TABLE suppliers add side_acc REAL;
@@ -6,8 +18,6 @@ ALTER TABLE suppliers add side_acc REAL;
 -- ## add till_val instead of dome_till
 -- validate till_val using 
 -- "mmn1".split('').map(x => ! isNaN(x) ? + x: x.charCodeAt(0)).reduce((a,b) => a+b);
-
-update "shader_configs" set config_value='1.41' where config_name = 'MANUAL_UPGRADED_TO';
 
 -- for amn1
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
@@ -27,10 +37,10 @@ VALUES ('kashf_header', 'kashf_mmn1.png', '', 'mmn1', 'config');
 -- 1.44
 -- F_STRICT_MODE
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('demo_hide', 'true', '', 'mmn1', 'config');
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('MANUAL_UPGRADED_TO', '1.44', '', 'default', 'config');
 
 
@@ -152,7 +162,6 @@ PRAGMA foreign_keys = 1;
 
 -- 1.42
 
-
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('sum_capital', 'اجمالي رأس المال', '', 'default', 'label');
 
@@ -179,22 +188,22 @@ select DISTINCT(day), 'true' as true from cashflow where day >= '2020-02-05';
 -- 1.41
 -- https://github.com/fireb1001/shaderlite/releases/
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category") 
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category") 
 VALUES ('dealer_init', 'رصيد', 'default', '+', '', 'dealer_trans');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow") 
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow") 
 VALUES ('dealer_pay', 'دفع تعامل', 'default', '+', '', 'dealer_trans', 'dealer_pay');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow") 
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow") 
 VALUES ('dealer_pay', 'دفع تعامل', 'default', '-', '', 'cashflow', '');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow") 
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow") 
 VALUES ('dealer_collect', 'تحصيل تعامل', 'default', '-', '', 'dealer_trans', 'dealer_collect');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow") 
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow") 
 VALUES ('dealer_collect', 'تحصيل تعامل', 'default', '+', '', 'cashflow', '');
 
-INSERT INTO "main"."shader_configs" 
+INSERT INTO "shader_configs" 
 ("config_name", "config_value", "config_verify", "shader_name", "category") 
 VALUES ('manage_dealers', 'ادارة المعاملات', '', 'default', 'label');
 
@@ -225,29 +234,29 @@ notes TEXT, FOREIGN KEY (dealer_id) REFERENCES dealers (id));
 ALTER TABLE products add cust_mashal REAL;
 
 -- version 1.38
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
 VALUES ('init_mashal', '.35', '', 'amn1', 'config');
 ALTER TABLE suppliers add box_count INTEGER;
 
 
 -- version 1.35 
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('F_AARBON_OUT', 'true', '', 'mmn1', 'config');
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('F_RECP_EXPENSES_INC', 'true', '', 'mmn1', 'config');
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('F_REPAY_RAHN_KASHF', 'true', '', 'mmn1', 'config');
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('F_AARBON_KASHF', 'true', '', 'mmn1', 'config');
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('F_SHOW_DEBT_KASHF', 'true', '', 'mmn1', 'config');
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
 VALUES ('shader_name', 'nada', '', 'default', 'config');
 
 -- version 1.33 -- 
@@ -261,37 +270,37 @@ ALTER TABLE products add weight_deduct REAL;
 
 --- ------------------------
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('product_rahn_external', 'رهن', 'default', '+', '3', 'customer_trans');
 -- config.json file
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow")
 VALUES ('aarbon', 'عربون', 'default', '-', '', 'customer_trans', 'aarbon');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow")
 VALUES ('aarbon', 'عربون', 'default', '+', '', 'cashflow', '');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow")
 VALUES ('repay_rahn_internal', 'عربون', 'default', '-', '', 'customer_trans', '');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_comm', 'عمولة + بياعة', 'default', '-', '', 'cashflow');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_mashal', 'اجمالي المشال', 'default', '-', '', 'cashflow');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_momen', 'حساب شركاء - معلم مؤمن', 'default', '-', '', 'cashflow');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_said', 'حساب شركاء - معلم السيد', 'default', '-', '', 'cashflow');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_mohamed', 'مصروف كاتب استاذ محمد', 'default', '-', '1', 'cashflow');
 
-INSERT INTO "main"."trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_hisham', 'مصروف كاتب استاذ هشام', 'default', '-', '1', 'cashflow');
 
-INSERT INTO "main"."shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
 VALUES ('init_recp_given', '1', '', 'mmn1', 'config');
 
 
