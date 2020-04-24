@@ -124,6 +124,14 @@
                 </router-link>
               </li>
 
+              <li class="nav-item" 
+              v-if=" true || app_config.shader_name == 'amn1' ">
+                <router-link class="nav-link active" to="/mng_packaging">
+                  <span class="fa fa-box"></span>
+                  ادارة المخزن
+                </router-link>
+              </li>
+
               <li class="nav-item" v-if="logged_in_user.user_type != 'editor'">
                 <router-link class="nav-link active" to="/daily_totals">
                   <span class="fa fa-calendar-alt"></span>
@@ -138,7 +146,6 @@
                   مجمع الارباح
                 </router-link>
               </li>
-
 
               <li class="nav-item" 
               v-if=" app_config.shader_name == 'amn1' && logged_in_user.user_type != 'editor'">

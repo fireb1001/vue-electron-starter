@@ -23,6 +23,7 @@ import DailyTotals from "./views/DailyTotals.vue";
 import DailyExpenses from "./views/DailyExpenses.vue";
 import CtgReceipts from "./views/CtgReceipts.vue";
 import SuppIncDetails from "./views/SuppIncDetails.vue";
+import Packaging from "./views/Packaging.vue";
 
 Vue.use(Router);
 
@@ -50,6 +51,11 @@ export default new Router({
       name: "daily_rahn",
       component: DailyTotals,
       props:{show_only: 'rahn'}
+    },
+    {
+      path: "/mng_packaging",
+      name: "mng_packaging",
+      component: Packaging,
     },
     {
       path: "/daily_revenue",

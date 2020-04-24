@@ -24,6 +24,7 @@
     <section class="row">
       <div class="col-5 pr-hideme">
 
+    <div>
         <div class="m-2" v-if="supplier.box_count">
           <h4>لديه {{supplier.box_count}} عداية</h4>
         </div>
@@ -59,6 +60,45 @@
           </form>
         </div>
       </b-collapse>
+    </div>
+
+    <div>
+        <div class="m-2" >
+          <h4>لديه {{packaging_count}} عداية في حساب المخزن</h4>
+        </div>
+        <button 
+        v-if="true || shader_configs['shader_name'] == 'amn1'"
+        v-b-toggle.collapse_packaging class=" btn btn-success m-2" >
+          <span class="fa fa-box"></span> &nbsp; 
+        رد / سحب عدايات
+        </button>
+      <b-collapse id="collapse_packaging" style="padding:25px;" class="pr-hideme">
+        <div class="entry-form">
+          <form  @submit="addToPackaging">
+          <b-form-group label=" الحركة">
+            <b-form-radio-group  v-model="packaging_form.type">
+              <b-form-radio value="-"> سحب </b-form-radio>
+              <b-form-radio value="+"> رد </b-form-radio>
+            </b-form-radio-group>
+          </b-form-group>
+
+          <div class="form-group row">
+            <label  class="col-sm-2">عدد العدايات</label>
+            <div class="col-sm-10">
+              <input v-model="packaging_form.amount" class="form-control "  placeholder="ادخل العدد">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success" >
+            <span v-if="packaging_form.type == '+'">رد</span>
+            <span v-else>سحب</span>
+          </button>
+
+          <button type="button" class="btn btn-danger mr-1"  v-b-toggle.collapse_packaging >  اغلاق</button>
+          </form>
+        </div>
+      </b-collapse>
+    </div>
 
     <div v-if="shader_configs['shader_name'] == 'mmn1'">
       <br/>
@@ -340,6 +380,7 @@ import { TransTypesCtrl } from '../ctrls/TransTypesCtrl';
 import { CashflowDAO, CashflowCtrl } from '../ctrls/CashflowCtrl';
 import { MainMixin } from '../mixins/MainMixin';
 import AlertDay from '@/components/AlertDay.vue'
+import { PackagingCtrl, PackagingDAO } from '../ctrls/PackagingCtrl';
 
 Settings.defaultLocale = 'ar'
 Settings.defaultZoneName = 'UTC'
@@ -355,8 +396,10 @@ export default {
       store_day: this.$store.state.day,
       confirm_step_recp: [],
       confirm_step: [],
+      packaging_count: 0,
       flags: {show_side_acc: false},
       add_box_count:{amount:0, type:'+'},
+      packaging_form:{amount:0, type:'+'},
       side_acc:{amount:0, type:'+'},
       suppliersCtrl: new SuppliersCtrl(),
       trans_form: {trans_type: 'supp_payment'},
@@ -374,6 +417,8 @@ export default {
       this.supplier = dao
       this.supplier_trans = trans
       this.supplier_receipts = await new ReceiptsCtrl().findAll({supplier_id: this.supplier.id})
+      let pkg_count = await new PackagingCtrl().getPersonSum({supplier_id: this.supplier.id})
+      this.packaging_count = pkg_count ? pkg_count : 0
     },
     async yeralyCloser(evt) {
       evt.preventDefault();
@@ -420,6 +465,20 @@ export default {
       await this.suppliersCtrl.save(this.supplier)
       this.add_box_count = {amount : 0 , type : '+'}
       this.$root.$emit('bv::toggle::collapse', 'collapse_boxes')
+      await this.refresh_all()
+    },
+    async addToPackaging(evt) {
+      evt.preventDefault()
+      console.log(this.packaging_form)
+      await new PackagingCtrl().save(new PackagingDAO({
+        amount: this.packaging_form.amount,
+        sum: this.packaging_form.type,
+        supplier_id: this.supplier.id,
+        day: this.day.iso
+      }))
+
+      this.packaging_form = {amount : 0 , type : '+'}
+      this.$root.$emit('bv::toggle::collapse', 'collapse_packaging')
       await this.refresh_all()
     },
     async addToSideAcc(evt){

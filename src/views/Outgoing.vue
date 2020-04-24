@@ -469,7 +469,6 @@ export default {
     async refresh_all() {
       this.avilable_incomings = await this.inoutHeadCtrl.findAll({diff: '> 0', day: this.$store.state.day.iso})
       this.active_customers = await this.customersCtrl.findAll({},{softDelete: true})
-      console.log(this.active_customers)
       this.outgoings_arr = await this.outgoingsCtrl.findAll({day: this.day.iso})
       this.outgoing_form = new OutgoingDAO({ day: this.$store.state.day.iso, ...OutgoingDAO.INIT_DAO})
       this.selected_inc = {}

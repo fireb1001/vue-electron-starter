@@ -1,7 +1,22 @@
--- 1.55
--- for nada
-update "shader_configs" set config_value='1.55' where config_name = 'MANUAL_UPGRADED_TO';
+-- 1.56
 
+update "shader_configs" set config_value='1.56' where config_name = 'MANUAL_UPGRADED_TO';
+
+-- Adding packaging
+CREATE TABLE "packaging" (
+	"id"	INTEGER PRIMARY KEY AUTOINCREMENT,
+	"day"	TEXT NOT NULL,
+	"sum"	TEXT,
+	"amount"	INTEGER,
+	"notes"	TEXT,
+	"supplier_id"	INTEGER,
+	"customer_id"	INTEGER,
+	"dealer_id"	INTEGER
+)
+
+-- 1.55
+
+-- Nada
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('till_val', '1902769254', '1902769658', 'nada', 'config');
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
