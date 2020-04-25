@@ -235,7 +235,6 @@ export default {
     this.all_products = all_products.map (product => { 
       return {id: product.id, product_name: product.name, color: product.notes}
     })
-    console.log(this.all_products)
     this.fresh_form()
   },
   computed: {

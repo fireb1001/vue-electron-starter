@@ -47,6 +47,43 @@
     حركة نقدية : تحصيل / امانة 
   </button> 
 
+      <div v-if=" shader_configs['shader_name'] == 'amn1'">
+        <div class="m-2" >
+          <h4>عدد {{packaging_count}} عداية في حساب المخزن</h4>
+        </div>
+        <button 
+        v-b-toggle.collapse_packaging class=" btn btn-success m-2" >
+          <span class="fa fa-box"></span> &nbsp; 
+        رد / سحب عدايات
+        </button>
+      <b-collapse id="collapse_packaging" style="padding:25px;" class="pr-hideme">
+        <div class="entry-form">
+          <form  @submit="addToPackaging">
+          <b-form-group label=" الحركة">
+            <b-form-radio-group  v-model="packaging_form.type">
+              <b-form-radio value="-"> سحب </b-form-radio>
+              <b-form-radio value="+"> رد </b-form-radio>
+            </b-form-radio-group>
+          </b-form-group>
+
+          <div class="form-group row">
+            <label  class="col-sm-2">عدد العدايات</label>
+            <div class="col-sm-10">
+              <input v-model="packaging_form.amount" class="form-control "  placeholder="ادخل العدد">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success" >
+            <span v-if="packaging_form.type == '+'">رد</span>
+            <span v-else>سحب</span>
+          </button>
+
+          <button type="button" class="btn btn-danger mr-1"  v-b-toggle.collapse_packaging >  اغلاق</button>
+          </form>
+        </div>
+      </b-collapse>
+    </div>
+
   <div v-if="shader_configs['shader_name'] == 'mmn1'">
       <br/>
         <div class="m-2" @click="flags.show_side_acc = !flags.show_side_acc">
@@ -464,6 +501,7 @@ import { CashflowDAO, CashflowCtrl } from '../ctrls/CashflowCtrl'
 import { MainMixin } from '../mixins/MainMixin';
 import { knex } from '../main';
 import AlertDay from '@/components/AlertDay.vue'
+import { PackagingCtrl, PackagingDAO } from '../ctrls/PackagingCtrl';
 // import image from '../assets/vegetables.png'
 
 export default {
@@ -492,11 +530,27 @@ export default {
       outg_day: {},
       show_trans_after: '',
       net_rahn: 0,
-      kashf_header:''
+      kashf_header:'',
+      packaging_form:{amount:0, type:'+'},
+      packaging_count: 0,
     }
   },
   mixins: [MainMixin],
   methods: {
+    async addToPackaging(evt) {
+      evt.preventDefault()
+      console.log(this.packaging_form)
+      await new PackagingCtrl().save(new PackagingDAO({
+        amount: this.packaging_form.amount,
+        sum: this.packaging_form.type,
+        customer_id: this.customer.id,
+        day: this.day.iso
+      }))
+
+      this.packaging_form = {amount : 0 , type : '+'}
+      this.$root.$emit('bv::toggle::collapse', 'collapse_packaging')
+      await this.getCustomerDetails()
+    },
     async getCustomerDetails() {
       //let {dao, trans} = await this.customersCtrl.getCustomerDetails(this.customer_id)
       // TODO get trans dynamicly
@@ -509,6 +563,8 @@ export default {
       if(this.customer.is_self ) {
         this.self_rest_products = await this.customersCtrl.getRestInSelf(this.customer_id)
       }
+      let pkg_count = await new PackagingCtrl().getPersonSum({customer_id: this.customer_id})
+      this.packaging_count = pkg_count ? pkg_count : 0
     },
     async showOutModal(day = null){
       this.d_collect_form = {trans_type: "cust_collecting"}

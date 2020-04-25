@@ -56,6 +56,10 @@ export class PackagingCtrl {
       let raw_sql = `select sum(amount) amount from packaging where supplier_id =${filter.supplier_id}`;
       let [result] = await knex.raw(raw_sql);
       amount = result.amount
+    } else if(filter.customer_id){
+      let raw_sql = `select sum(amount) amount from packaging where customer_id =${filter.customer_id}`;
+      let [result] = await knex.raw(raw_sql);
+      amount = result.amount
     }
 
     return parseInt(amount)

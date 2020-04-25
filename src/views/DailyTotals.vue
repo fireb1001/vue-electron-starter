@@ -903,7 +903,7 @@ export default {
         sum_totals.sum_product_rahn += one.sum_product_rahn
         sum_totals.sum_repay_rahn += one.sum_repay_rahn + one.sum_rahn_down
         sum_totals.sum_rahn_incr += one.sum_rahn_increase
-        sum_totals.sum_net_income += one.recp_sum_comm + one.out_sell_comm + (one.sum_out_value - one.recp_sum_sale) - one.sum_deducts
+        sum_totals.sum_net_income += one.recp_sum_comm + one.out_sell_comm - one.sum_deducts
       })
       return sum_totals
     },

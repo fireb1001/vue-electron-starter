@@ -63,7 +63,9 @@
                 {{item.customer_name}}
                 {{item.dealer_name}}
               </td>
-              <td>{{item.amount }}</td>
+              <td>
+                <span v-if="item.amount > 0">+</span>{{item.amount}}
+              </td>
               <td>
                 <button class="btn text-danger" @click="deleteTrans(item.id)" v-if="item.id" >
                   <span class="fa fa-trash "></span> 
@@ -138,7 +140,7 @@ export default {
       this.pkg_trans = []
       let [init_stock] = await new PackagingCtrl().getInitStock({day: this.day.iso});
       this.pkg_trans.push(new PackagingDAO({amount: init_stock.amount, notes: 'رصيد'}))
-      let today_trans = await new PackagingCtrl().findAll({day: this.day.iso});
+      let today_trans = await new PackagingCtrl().findAll({day: this.day.iso}, 'id');
       this.pkg_trans.push(...today_trans);
       console.log(this.pkg_trans)
     }

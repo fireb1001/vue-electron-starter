@@ -24,7 +24,7 @@
     <section class="row">
       <div class="col-5 pr-hideme">
 
-    <div>
+    <div v-if=" shader_configs['shader_name'] == 'mmn1'">
         <div class="m-2" v-if="supplier.box_count">
           <h4>لديه {{supplier.box_count}} عداية</h4>
         </div>
@@ -62,12 +62,11 @@
       </b-collapse>
     </div>
 
-    <div>
+    <div v-if=" shader_configs['shader_name'] == 'amn1'">
         <div class="m-2" >
-          <h4>لديه {{packaging_count}} عداية في حساب المخزن</h4>
+          <h4>عدد {{packaging_count}} عداية في حساب المخزن</h4>
         </div>
         <button 
-        v-if="true || shader_configs['shader_name'] == 'amn1'"
         v-b-toggle.collapse_packaging class=" btn btn-success m-2" >
           <span class="fa fa-box"></span> &nbsp; 
         رد / سحب عدايات
