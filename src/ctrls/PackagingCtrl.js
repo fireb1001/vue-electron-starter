@@ -4,6 +4,7 @@ export class PackagingDAO {
   id;
   day;
   sum;
+  count;
   amount;
   notes;
   supplier_id;
@@ -12,6 +13,8 @@ export class PackagingDAO {
   dealer_name;
   customer_id;
   customer_name;
+  cashflow_id;
+  out_scope;
 
   static get INIT_DAO() {
     return {};
@@ -20,9 +23,9 @@ export class PackagingDAO {
 
 
   parseTypes() {
-    this.amount = this.amount
-      ? parseInt(this.amount)
-      : 0;
+    this.count = this.count ? parseInt(this.count) : 0 ;
+    this.amount = this.amount ? parseFloat(this.amount) : 0 ; 
+    if(this.sum === '-') this.count = - this.count
     if(this.sum === '-') this.amount = - this.amount
     delete this.customer_name;
     delete this.supplier_name;
@@ -51,31 +54,33 @@ export class PackagingCtrl {
   }
 
   async getPersonSum(filter= {supplier_id: 0, customer_id:0 , dealer_id: 0}){
-    let amount = 0 
+    let count, amount = 0 
     if(filter.supplier_id){
-      let raw_sql = `select sum(amount) amount from packaging where supplier_id =${filter.supplier_id}`;
+      let raw_sql = `select sum(count) count, sum(amount) amount from packaging 
+      where supplier_id =${filter.supplier_id} and (out_scope !=1 or out_scope is null)`;
       let [result] = await knex.raw(raw_sql);
+      count = result.count
       amount = result.amount
     } else if(filter.customer_id){
-      let raw_sql = `select sum(amount) amount from packaging where customer_id =${filter.customer_id}`;
+      let raw_sql = `select sum(count) count, sum(amount) amount from packaging where customer_id =${filter.customer_id}`;
       let [result] = await knex.raw(raw_sql);
+      count = result.count
       amount = result.amount
     }
 
-    return parseInt(amount)
+    return {count: +count, amount: +amount}
   }
 
   async getInitStock(filter= {day: ''}) {
     let result = null
     if(filter.day) {
       // get sum before day
-      let raw_sql = `select sum(amount) amount from packaging where day < '${filter.day}'`;
+      let raw_sql = `select sum(count) count, sum(amount) amount from packaging where day < '${filter.day}'`;
       console.log(raw_sql)
       result = await knex.raw(raw_sql);
     } else {
       throw Error('day is not provided')
     }
-    console.log(result)
     return result
   }
 

@@ -8,7 +8,8 @@ export class TransTypeDAO {
   category
   map_cashflow
   map_customer_trans
-  flags
+  cust_form
+  map_packaging
 
   static get INIT_DAO() {
     return { }

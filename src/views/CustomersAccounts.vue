@@ -94,6 +94,7 @@ hide-header hide-footer hide-header-close hide-backdrop>
                 {{item.notes }}
               </td>
             </template>
+            <!--
             <template v-if="item.trans_type == 'product_rahn'">
               <td>{{ item.amount | toAR(true) }} </td>
               <td> {{ item.count | toAR }}</td>
@@ -109,6 +110,29 @@ hide-header hide-footer hide-header-close hide-backdrop>
               <td> تنزيل</td>
               <td> </td>
             </template>
+            -->
+          </tr>
+
+          <tr>
+            <td >
+              <b class="border-top border-primary">
+                <span>
+                  {{ sum_out_products_only | round2 | toAR }}
+                </span>
+              </b>
+            </td>
+            <td style="border: none !important;"> مجموع </td>
+          </tr>
+
+          <tr>
+            <td >
+              <b class="border-top border-primary">
+                <span>
+                  {{ sum_rahn_only | round2 | toAR }}
+                </span>
+              </b>
+            </td>
+            <td style="border: none !important;"> رهن </td>
           </tr>
 
           <tr v-if="app_config.shader_name != 'nada'"
@@ -199,7 +223,7 @@ hide-header hide-footer hide-header-close hide-backdrop>
                 <span v-else>{{ sum_outgoings_val | round | toAR }} </span>
               </b>
             </td>
-            <td style="border: none !important;"> اجمالي </td>
+            <td style="border: none !important;"> صافي </td>
           </tr>
         </tbody>
       </table>
@@ -241,6 +265,7 @@ import { MainMixin } from "../mixins/MainMixin";
 import { CustomersCtrl, CustomerTransDAO } from "../ctrls/CustomersCtrl";
 import { CashflowCtrl, CashflowDAO } from "../ctrls/CashflowCtrl";
 import { TransTypesCtrl } from "../ctrls/TransTypesCtrl";
+import { PackagingCtrl, PackagingDAO } from '../ctrls/PackagingCtrl';
 
 export default {
   name: "accounts",
@@ -413,6 +438,17 @@ export default {
           cashflow_id = await cashflowCtrl.save(newCashflow);
         }
 
+        if( selectedTrans.map_packaging ) {
+          await new PackagingCtrl().save(new PackagingDAO({
+            count: +trans_form.amount / this.shader_configs['pkg_price'],
+            amount: +trans_form.amount,
+            sum: selectedTrans.map_packaging,
+            customer_id: this.customer.id,
+            day: this.day.iso,
+            notes: selectedTrans.ar_name
+          }))
+        }
+
         let custtransDAO = new CustomerTransDAO(trans_form);
         custtransDAO.day = this.$store.state.day.iso;
         custtransDAO.customer_id = this.customer.id;
@@ -447,6 +483,22 @@ export default {
         sum += parseFloat(item.amount);
       });
       return sum;
+    },
+    sum_out_products_only: function() {
+      let sum = 0
+      this.daily_out_trans.forEach(item => {
+        if(item.trans_type == 'outgoing')
+          sum += parseFloat(item.amount)
+      })
+      return sum
+    },
+    sum_rahn_only: function() {
+      let sum = 0
+      this.daily_out_trans.forEach(item => {
+        if(item.trans_type == 'product_rahn')
+          sum += parseFloat(item.amount)
+      })
+      return sum
     },
     sum_debt_cmpt: function() {
       let sum_debt = 0

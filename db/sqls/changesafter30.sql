@@ -1,24 +1,112 @@
+-- 1.57
+
+INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags", "cust_form") 
+VALUES ('init_pkg', 'عدايات لدي التاجر', 'default', '+', '', 'customer_trans', '', '', '', 'CUST_FORM', '1');
+
+-- map_cashflow cust_discount,anti_cust_discount
+
+alter TABLE packaging add COLUMN cashflow_id INTEGER;
+alter TABLE packaging add COLUMN out_scope INTEGER;
+
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags") 
+VALUES ('pkg_destruct', 'اهلاك عدايات', 'default', '-', '', 'packaging', 'pkg_destruct,anti_pkg_destruct', '', '', '');
+
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags") 
+VALUES ('pkg_destruct', 'اهلاك عدايات', 'default', '-', '1', 'cashflow', 'ex', '', '', 'DEDUCT');
+
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags") 
+VALUES ('anti_pkg_destruct', 'تعويض اهلاك عدايات', 'default', '+', '', 'cashflow', '', '', '', '');
+
 -- 1.56
 
+---
+-- for amn1
+update shader_configs set config_value = '1614970718' where config_name = 'till_val';
+update shader_configs set config_verify = '1614971035' where config_name = 'till_val';
+
+alter TABLE incomings add COLUMN pkg_dismiss INTEGER;
+alter TABLE trans_types add COLUMN cust_form INTEGER;
+alter TABLE trans_types add COLUMN map_packaging TEXT;
+
+update trans_types set cust_form = 1 where flags = 'CUST_FORM';
+
 update "shader_configs" set config_value='1.56' where config_name = 'MANUAL_UPGRADED_TO';
+
+INSERT INTO shader_configs ("config_name", "config_value", "config_verify", "shader_name", "category") 
+VALUES ('pkg_price', '10', '', 'amn1', 'config');
 
 -- Adding packaging
 CREATE TABLE "packaging" (
 	"id"	INTEGER PRIMARY KEY AUTOINCREMENT,
 	"day"	TEXT NOT NULL,
 	"sum"	TEXT,
-	"amount"	INTEGER,
+	"count"	INTEGER,
+	"amount"	REAL,
 	"notes"	TEXT,
 	"supplier_id"	INTEGER,
 	"customer_id"	INTEGER,
 	"dealer_id"	INTEGER
 )
 
+-- DELETE cols from trans_types
+PRAGMA foreign_keys = 0;
+
+CREATE TABLE sqlitestudio_temp_table AS SELECT *
+                                          FROM trans_types;
+
+DROP TABLE trans_types;
+
+CREATE TABLE trans_types (
+    name               TEXT    NOT NULL,
+    ar_name            TEXT    NOT NULL,
+    shader_name        TEXT    NOT NULL,
+    sum                TEXT    NOT NULL,
+    optional           INTEGER,
+    category           TEXT    NOT NULL,
+    map_cashflow       TEXT,
+    map_customer_trans TEXT,
+    cust_form          INTEGER,
+    map_packaging          TEXT,
+    PRIMARY KEY (
+        name,
+        category
+    )
+);
+
+INSERT INTO trans_types (
+                            name,
+                            ar_name,
+                            shader_name,
+                            sum,
+                            optional,
+                            category,
+                            map_cashflow,
+                            map_customer_trans,
+                            cust_form,
+                            map_packaging
+                        )
+                        SELECT name,
+                               ar_name,
+                               shader_name,
+                               sum,
+                               optional,
+                               category,
+                               map_cashflow,
+                               map_customer_trans,
+                               cust_form,
+                               map_packaging
+                          FROM sqlitestudio_temp_table;
+
+DROP TABLE sqlitestudio_temp_table;
+
+PRAGMA foreign_keys = 1;
+
 -- 1.55
 
 -- Nada
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
-VALUES ('till_val', '1902769254', '1902769658', 'nada', 'config');
+VALUES ('till_val', '1614970718', '1902769658', 'amn1', 'config');
+
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('till_hide', 'true', '', 'nada', 'config');
 

@@ -49,8 +49,9 @@
 
       <div v-if=" shader_configs['shader_name'] == 'amn1'">
         <div class="m-2" >
-          <h4>عدد {{packaging_count}} عداية في حساب المخزن</h4>
+          <h4>عدد {{packaging.count}} عداية في حساب المخزن بمبلغ {{packaging.amount}}</h4>
         </div>
+        <!--
         <button 
         v-b-toggle.collapse_packaging class=" btn btn-success m-2" >
           <span class="fa fa-box"></span> &nbsp; 
@@ -69,7 +70,7 @@
           <div class="form-group row">
             <label  class="col-sm-2">عدد العدايات</label>
             <div class="col-sm-10">
-              <input v-model="packaging_form.amount" class="form-control "  placeholder="ادخل العدد">
+              <input v-model="packaging_form.count" class="form-control "  placeholder="ادخل العدد">
             </div>
           </div>
 
@@ -82,6 +83,7 @@
           </form>
         </div>
       </b-collapse>
+      -->
     </div>
 
   <div v-if="shader_configs['shader_name'] == 'mmn1'">
@@ -234,7 +236,15 @@
       <div class="table-responsive col-8 " v-if="flags.modal_closed">
 
         <h1 class="pr-only">كشف مديونية  {{customer.name}}</h1>
-
+        <div class="row m-2">
+            <div class="col-sm-6">رصيد المديونية الحالي</div>
+            <div class="col-sm-6">
+              <b>
+              {{sum_debt_cmpt | round | toAR}}
+              </b>
+            </div>
+        </div>
+        <br/>
         <table class="table table-striped ">
           <thead>
             <tr>
@@ -364,6 +374,7 @@ hide-header hide-footer hide-header-close hide-backdrop>
                 {{item.notes }}
               </td>
             </template>
+            <!-- For product_rahn 
             <template v-if="item.trans_type == 'product_rahn'">
               <td>{{ item.amount | toAR(true) }} </td>
               <td> {{ item.count | toAR }}</td>
@@ -374,7 +385,32 @@ hide-header hide-footer hide-header-close hide-backdrop>
                 {{item.notes }}
               </td>
             </template>
+            -->
           </tr>
+          
+          <tr>
+            <td >
+              <b class="border-top border-primary">
+                <span>
+                  {{ sum_out_products_only | round2 | toAR }}
+                </span>
+              </b>
+            </td>
+            <td style="border: none !important;"> مجموع </td>
+          </tr>
+
+
+          <tr>
+            <td >
+              <b class="border-top border-primary">
+                <span>
+                  {{ sum_rahn_only | round2 | toAR }}
+                </span>
+              </b>
+            </td>
+            <td style="border: none !important;"> رهن </td>
+          </tr>
+
           <tr :class="{'pr-hideme': !d_collect_form.amount }" 
           v-if="app_config.shader_name != 'nada' ">
             <td ><input 
@@ -459,8 +495,9 @@ hide-header hide-footer hide-header-close hide-backdrop>
                 </span>
               </b>
             </td>
-            <td style="border: none !important;"> اجمالي </td>
+            <td style="border: none !important;"> صافي </td>
           </tr>
+          
         </tbody>
       </table>
 
@@ -532,22 +569,21 @@ export default {
       net_rahn: 0,
       kashf_header:'',
       packaging_form:{amount:0, type:'+'},
-      packaging_count: 0,
+      packaging: {count: 0, amount: 0},
     }
   },
   mixins: [MainMixin],
   methods: {
     async addToPackaging(evt) {
       evt.preventDefault()
-      console.log(this.packaging_form)
       await new PackagingCtrl().save(new PackagingDAO({
-        amount: this.packaging_form.amount,
+        count: this.packaging_form.count,
         sum: this.packaging_form.type,
         customer_id: this.customer.id,
         day: this.day.iso
       }))
 
-      this.packaging_form = {amount : 0 , type : '+'}
+      this.packaging_form = {count : 0 , type : '+'}
       this.$root.$emit('bv::toggle::collapse', 'collapse_packaging')
       await this.getCustomerDetails()
     },
@@ -558,13 +594,12 @@ export default {
       this.customer_trans = await this.customersCtrl.getCustomerTrans({id: this.customer_id})
       console.log(this.customer_trans);
       this.net_rahn = await this.customersCtrl.getCustomerNetRahn({id: this.customer_id})
-      console.log(this.net_rahn)
-      this.trans_types_opts = await this.transTypesCtrl.findAll({category: 'customer_trans', flags: 'CUST_FORM' })
+      this.trans_types_opts = await this.transTypesCtrl.findAll({category: 'customer_trans', cust_form: 1 })
       if(this.customer.is_self ) {
         this.self_rest_products = await this.customersCtrl.getRestInSelf(this.customer_id)
       }
-      let pkg_count = await new PackagingCtrl().getPersonSum({customer_id: this.customer_id})
-      this.packaging_count = pkg_count ? pkg_count : 0
+      this.packaging = await new PackagingCtrl().getPersonSum({customer_id: this.customer_id})
+
     },
     async showOutModal(day = null){
       this.d_collect_form = {trans_type: "cust_collecting"}
@@ -689,11 +724,23 @@ export default {
         trans_form = this.customer_trans_form
       let selectedTrans = await this.transTypesCtrl.findOne({name: trans_form.trans_type , category: 'customer_trans'})
       // create customer trans
-      if(selectedTrans) {
+      if(selectedTrans.name == 'init_pkg') {
+          await new PackagingCtrl().save(new PackagingDAO({
+            count: +trans_form.amount / this.shader_configs['pkg_price'],
+            amount: trans_form.amount,
+            sum: trans_form.amount > 0 ? '-' : '+',
+            customer_id: this.customer.id,
+            day: this.day.iso,
+            notes: selectedTrans.ar_name
+          }))
+      }
+      else if(selectedTrans) {
         let cashflow_id = null
         if(selectedTrans.map_cashflow){
           // Create cashflow with trans
-          let cashflowTrans = await this.transTypesCtrl.findOne({name: selectedTrans.map_cashflow , category: 'cashflow'})
+          let splt = selectedTrans.map_cashflow.split(',');
+
+          let cashflowTrans = await this.transTypesCtrl.findOne({name: splt[0] , category: 'cashflow'})
           
           let newCashflow = new CashflowDAO({
             amount: trans_form.amount,
@@ -705,8 +752,8 @@ export default {
           let cashflowCtrl = new CashflowCtrl()
           cashflow_id = await cashflowCtrl.save(newCashflow)
 
-          if( selectedTrans.map_cashflow == 'cust_discount') {
-            let cashflowTrans = await this.transTypesCtrl.findOne({name: 'anti_cust_discount' , category: 'cashflow'});
+          if( splt[1] ) {
+            let cashflowTrans = await this.transTypesCtrl.findOne({name: splt[1] , category: 'cashflow'});
             let newCashflow = new CashflowDAO({
               amount: trans_form.amount,
               day: this.$store.state.day.iso,
@@ -716,6 +763,17 @@ export default {
             newCashflow.transType = cashflowTrans
             await new CashflowCtrl().save(newCashflow);
           }
+        }
+
+        if( selectedTrans.map_packaging ) {
+          await new PackagingCtrl().save(new PackagingDAO({
+            count: +trans_form.amount / this.shader_configs['pkg_price'],
+            amount: trans_form.amount,
+            sum: selectedTrans.map_packaging,
+            customer_id: this.customer.id,
+            day: this.day.iso,
+            notes: selectedTrans.ar_name
+          }))
         }
 
         let custtransDAO = new CustomerTransDAO(trans_form)
@@ -778,6 +836,22 @@ export default {
         sum_debt += parseFloat(trans.amount)
       })
       return sum_debt
+    },
+    sum_out_products_only: function() {
+      let sum = 0
+      this.daily_out_trans.forEach(item => {
+        if(item.trans_type == 'outgoing')
+          sum += parseFloat(item.amount)
+      })
+      return sum
+    },
+    sum_rahn_only: function() {
+      let sum = 0
+      this.daily_out_trans.forEach(item => {
+        if(item.trans_type == 'product_rahn')
+          sum += parseFloat(item.amount)
+      })
+      return sum
     },
     sum_outgoings_val: function() {
       let sum = 0

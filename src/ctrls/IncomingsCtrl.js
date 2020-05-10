@@ -15,6 +15,7 @@ export class IncomingDAO {
   group_id
   nolon
   given
+  pkg_dismiss
 
   // Constant member
   static get INIT_DAO() {

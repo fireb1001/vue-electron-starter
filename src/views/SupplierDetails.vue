@@ -64,7 +64,7 @@
 
     <div v-if=" shader_configs['shader_name'] == 'amn1'">
         <div class="m-2" >
-          <h4>عدد {{packaging_count}} عداية في حساب المخزن</h4>
+          <h4>عدد {{packaging.count}} عداية في حساب المخزن بمبلغ {{packaging.amount}}</h4>
         </div>
         <button 
         v-b-toggle.collapse_packaging class=" btn btn-success m-2" >
@@ -84,10 +84,17 @@
           <div class="form-group row">
             <label  class="col-sm-2">عدد العدايات</label>
             <div class="col-sm-10">
-              <input v-model="packaging_form.amount" class="form-control "  placeholder="ادخل العدد">
+              <input v-model="packaging_form.count" class="form-control "  placeholder="ادخل العدد">
             </div>
           </div>
-
+          <div class="form-group row">
+            سوف يتم 
+            &nbsp;
+            <span v-if="packaging_form.type == '+'"> اضافة </span>
+            <span v-else> خصم </span> &nbsp;
+            عدايات بمبلغ 
+            {{ +packaging_form.count * +shader_configs['pkg_price'] }} ج علي المخزن
+          </div>
           <button type="submit" class="btn btn-success" >
             <span v-if="packaging_form.type == '+'">رد</span>
             <span v-else>سحب</span>
@@ -395,7 +402,7 @@ export default {
       store_day: this.$store.state.day,
       confirm_step_recp: [],
       confirm_step: [],
-      packaging_count: 0,
+      packaging: {count: 0, amount: 0},
       flags: {show_side_acc: false},
       add_box_count:{amount:0, type:'+'},
       packaging_form:{amount:0, type:'+'},
@@ -416,8 +423,7 @@ export default {
       this.supplier = dao
       this.supplier_trans = trans
       this.supplier_receipts = await new ReceiptsCtrl().findAll({supplier_id: this.supplier.id})
-      let pkg_count = await new PackagingCtrl().getPersonSum({supplier_id: this.supplier.id})
-      this.packaging_count = pkg_count ? pkg_count : 0
+      this.packaging = await new PackagingCtrl().getPersonSum({supplier_id: this.supplier.id})
     },
     async yeralyCloser(evt) {
       evt.preventDefault();
@@ -470,13 +476,14 @@ export default {
       evt.preventDefault()
       console.log(this.packaging_form)
       await new PackagingCtrl().save(new PackagingDAO({
-        amount: this.packaging_form.amount,
+        count: this.packaging_form.count,
+        amount: +this.packaging_form.count * +this.shader_configs['pkg_price'],
         sum: this.packaging_form.type,
         supplier_id: this.supplier.id,
         day: this.day.iso
       }))
 
-      this.packaging_form = {amount : 0 , type : '+'}
+      this.packaging_form = {count : 0 , type : '+'}
       this.$root.$emit('bv::toggle::collapse', 'collapse_packaging')
       await this.refresh_all()
     },

@@ -143,7 +143,8 @@
               <th v-if="flags.detailed ">كراسة</th>
               <th>رصيد</th>
               
-              <th>{{'sum_rasd' | tr_label}}</th>
+              <th v-if="app_config.shader_name != 'amn1'">{{'sum_rasd' | tr_label}}</th>
+              <th v-if="app_config.shader_name == 'amn1'">{{'عدد العدايات' | tr_label}}</th>
               <td></td>
             </tr>
           </thead>
@@ -159,7 +160,8 @@
               <td >{{item.notes}}</td>
               <td v-if="flags.detailed ">{{item.side_acc}}</td>
               <td>{{item.sum_debt | round | toAR}}</td>
-              <td>{{item.sum_net_rasd | round | toAR}}</td>
+              <td v-if="app_config.shader_name != 'amn1'">{{ item.sum_net_rasd | round | toAR}}</td>
+              <td v-if="app_config.shader_name == 'amn1'">{{ item.pkg_count }}</td>
               <td class="d-print-none">
                 <button class="btn text-danger" @click="archive(item.id)"  v-if="flags.detailed && ! item.deleted_at">
                   <span class="fa fa-archive "></span> 

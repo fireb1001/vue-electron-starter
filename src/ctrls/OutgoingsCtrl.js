@@ -3,6 +3,8 @@ import { CustomersCtrl, CustomerTransDAO } from './CustomersCtrl'
 import { TransTypesCtrl } from './TransTypesCtrl';
 import { ProductsCtrl } from './ProductsCtrl';
 import { CashflowCtrl, CashflowDAO} from './CashflowCtrl'
+import { PackagingCtrl, PackagingDAO } from './PackagingCtrl';
+import { store } from '../store';
 
 export class OutgoingDAO {
 
@@ -111,6 +113,17 @@ export class OutgoingsCtrl {
           cashflow_id = await new CashflowCtrl().save(newCashflow)
         }
 
+        if(rahnTrans.map_packaging) {
+          await new PackagingCtrl().save(new PackagingDAO({
+            count: +data.count,
+            amount: +data.product_rahn * +data.count,
+            sum: rahnTrans.map_packaging,
+            customer_id: data.customer_id,
+            day: store.state.day.iso,
+            notes: rahnTrans.ar_name
+          }))
+        }
+
         let customerTrans = new CustomerTransDAO()
         customerTrans.transType = rahnTrans
         customerTrans.day = data.day
@@ -124,7 +137,7 @@ export class OutgoingsCtrl {
         await new CustomersCtrl().updateDebtByTrans(customerTrans)
       }
 
-      // if  product_mashal
+      // if product_mashal
       let product = await new ProductsCtrl().findById(data.product_id)
       if(product.cust_mashal) {
         let prod_mashal = parseFloat(product.cust_mashal)

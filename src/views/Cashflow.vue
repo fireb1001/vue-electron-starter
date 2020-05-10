@@ -146,6 +146,7 @@ import { knex } from '../main';
 import { CustomersCtrl } from '../ctrls/CustomersCtrl';
 import { SuppliersCtrl } from '../ctrls/SuppliersCtrl';
 import { ReceiptsCtrl } from '../ctrls/ReceiptsCtrl';
+import { PackagingCtrl, PackagingDAO } from '../ctrls/PackagingCtrl';
 
 export default {
   name: 'cashflow',
@@ -229,7 +230,19 @@ export default {
       let cashTrans = await transTypesCtrl.findOne({name: cashDAO.state , category: 'cashflow' })
       cashDAO.sum = cashTrans.sum
 
-      await this.cashflowCtrl.save(cashDAO)
+      await this.cashflowCtrl.save(cashDAO);
+      if(cashTrans.map_packaging && this.shader_configs['pkg_price']) {
+        // Create packaging trans
+        let pkg_count = cashDAO.amount / +this.shader_configs['pkg_price'];
+        console.log(pkg_count, this.shader_configs['pkg_price'])
+        await new PackagingCtrl().save(new PackagingDAO({
+          count: pkg_count,
+          amount: cashDAO.amount,
+          day: this.day.iso,
+          sum: cashTrans.map_packaging,
+          notes: cashTrans.ar_name
+        }))
+      }
       this.$root.$emit('bv::toggle::collapse', 'collapse_cash')
       this.cashflow_form = new CashflowDAO(CashflowDAO.INIT_DAO)
       this.refresh_all()

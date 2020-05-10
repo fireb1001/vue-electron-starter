@@ -18,6 +18,8 @@ export class SupplierDAO {
 
   sum_debt
   sum_net_rasd
+  pkg_count
+  pkg_amount
 
   static get INIT_DAO() {
     return { name: '' }
@@ -31,6 +33,9 @@ export class SupplierDAO {
 
     delete this.trans
     delete this.supplier_id
+
+    delete this.pkg_count
+    delete this.pkg_amount
   }
 
   constructor (data) {
@@ -180,6 +185,11 @@ LEFT JOIN (
   select supplier_id, sum(net_value) as sum_net_rasd from receipts group by supplier_id 
 ) supp_recp_g
 ON  suppliers_g.id = supp_recp_g.supplier_id
+LEFT JOIN (
+  select supplier_id, sum(count) pkg_count, sum(amount) pkg_amount from packaging 
+  where out_scope !=1 or out_scope is null  GROUP by supplier_id
+) supp_pkg
+ON  suppliers_g.id = supp_pkg.supplier_id
 ${options.orderByBalance ? 'order by balance desc' : ''}
 ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
 `

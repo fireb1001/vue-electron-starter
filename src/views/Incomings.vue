@@ -59,6 +59,18 @@
                   <template v-if="! confirm_step[incom.id]"> حذف </template>
                   <template v-if="confirm_step[incom.id]"> تأكيد </template>
                 </button>
+
+                <button class="btn text-primary" v-if="! incom.pkg_dismiss" @click="pkg_dismiss(incom)" >
+                  <span class="fa fa-box "></span> 
+                  <template v-if="! confirm_step[incom.id]"> صرف </template>
+                  <template v-if="confirm_step[incom.id]"> تأكيد </template>
+                </button>
+
+                <button class="btn text-primary" v-if="false && incom.pkg_dismiss" >
+                  <span class="fa fa-receipt "></span> 
+                  طباعة اذن صرف
+                </button>
+
               </td>
             </tr>
             <tr v-if="! search_term">
@@ -89,6 +101,7 @@ import IncomingResalahForm from '@/components/IncomingResalahForm.vue'
 import { IncomingsCtrl, IncomingDAO } from '../ctrls/IncomingsCtrl'
 import { MainMixin } from '../mixins/MainMixin'
 import { CashflowCtrl } from '../ctrls/CashflowCtrl'
+import { PackagingCtrl, PackagingDAO } from '../ctrls/PackagingCtrl'
 
 export default {
   name: 'incomings',
@@ -112,6 +125,27 @@ export default {
     async refresh_all() {
       this.incoming_form.day = this.day.iso
       this.incomings_arr = await this.incomingsCtrl.findAll({day: this.day.iso})
+    },
+    async pkg_dismiss(incom) {
+      if( this.confirm_step[incom.id] ) {
+        await new PackagingCtrl().save(new PackagingDAO({
+          count: incom.count,
+          amount: +incom.count * +this.shader_configs['pkg_price'],
+          sum: '-',
+          supplier_id: incom.supplier_id,
+          day: this.day.iso,
+          notes: 'اذن صرف',
+          out_scope: 1
+        }))
+        incom.pkg_dismiss = 1 ;
+        await new IncomingsCtrl().save(incom)
+        await this.refresh_all()
+      }
+      else {
+        this.confirm_step = []
+        this.confirm_step[incom.id] = true
+      }
+
     },
     async discard(id) {
       if( this.confirm_step[id] ) {
