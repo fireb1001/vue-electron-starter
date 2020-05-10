@@ -52,6 +52,8 @@ export class CustomerTransDAO {
   kg_price;
   actual_sale;
   debt_was;
+  pkg_count;
+  pkg_amount;
 
   constructor(data = {}) {
     Object.assign(this, data);
@@ -73,6 +75,9 @@ export class CustomerTransDAO {
     this.debt_was = this.debt_was ? parseFloat(this.debt_was) : 0;
     delete this.weight;
     delete this.kg_price;
+
+    delete this.pkg_count;
+    delete this.pkg_amount;
   }
 }
 
@@ -148,6 +153,11 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
     ${options.softDelete ? " and deleted_at is null" : ""}
      ) customers_g
    ON customer_trans_g.customer_id = customers_g.id 
+   LEFT JOIN (
+    select customer_id, sum(count) pkg_count, sum(amount) pkg_amount from packaging 
+    where out_scope !=1 or out_scope is null  GROUP by customer_id
+  ) cust_pkg
+  ON  customers_g.id  = cust_pkg.customer_id
    `;
    if(! options.noOrderByName) query +=
    `${ options.orderByDebt ? 'order by debt desc' : 'order by name '}`
