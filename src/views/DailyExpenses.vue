@@ -4,19 +4,27 @@
     <div class="row">
       <div class="col-4">
           من
-        <datetime v-model="from_day" 
-        @input="refresh_all" 
-        :auto="true"  class="datetime" 
-        min-datetime="2019-01-01">
-        </datetime>
+              <datetime 
+    v-model="from_day" 
+    @close="refresh_all" 
+    :auto="true" 
+    class="datetime" 
+    min-datetime="2019-10-31"
+    max-datetime="2069-10-31">
+    </datetime>
+
       </div>
       <div class="col-4">
         الي
-        <datetime v-model="to_day" 
-        @input="refresh_all" 
-        :auto="true"  class="datetime" 
-        min-datetime="2019-01-01">
-        </datetime>
+    <datetime 
+    v-model="to_day" 
+    @close="refresh_all" 
+    :auto="true" 
+    class="datetime" 
+    min-datetime="2019-10-31"
+    max-datetime="2069-10-31">
+    </datetime>
+
       </div>
     </div>
     <br/>
@@ -59,7 +67,7 @@
 </template>
 <script>
 import { MainMixin } from '../mixins/MainMixin'
-import { knex, moment } from '../main'
+import { knex } from '../main'
 import { Settings, DateTime } from 'luxon'
 import { CashflowCtrl } from '../ctrls/CashflowCtrl'
 
@@ -83,7 +91,8 @@ export default {
     async save(evt) {
       evt.preventDefault()
     },
-    async refresh_all(){
+    async refresh_all(day){
+      console.log("day",day)
       this.daily_expenses = [];
       let fromDateTime = this.from_day ? DateTime.fromISO(this.from_day) : null;
       let toDateTime = this.to_day ? DateTime.fromISO(this.to_day): null;
@@ -99,10 +108,11 @@ export default {
         GROUP by day, state 
       `
       let daily_ex = await knex.raw(query);
-      console.log(query)
+      console.log(query);
       daily_ex.map( item => {
         daily_ex_by_day[item.day] = { ...daily_ex_by_day[item.day],day: item.day, [item.state]: item.sum}
       });
+      console.log(Object.keys(daily_ex_by_day))
       //daily_ex_by_day.forEach(one => { console.log(one); this.daily_expenses.push(one)} )
       Object.keys(daily_ex_by_day).forEach( day => {
         this.daily_expenses.push(daily_ex_by_day[day])

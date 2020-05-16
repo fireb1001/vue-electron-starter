@@ -183,7 +183,10 @@
               <th> كود </th>
               <th>اسم</th>
               <th>مديونية</th>
+              <!--
               <th v-if="app_config.shader_name == 'amn1'">{{'عدد العدايات' | tr_label}}</th>
+              -->
+              <th v-if="true"> صافي الرهونات</th>
               <th v-if="false"> calc مديونية</th>
               <th v-if=" flags.zm_mode" width="25%">تحصيل</th>
               <th v-if="false">ملاحظات</th>
@@ -203,10 +206,14 @@
               <td>{{item.sum_debt | round | toAR }}
                 <span class="text-danger pr-hideme" v-if="false && (item.sum_debt - item.debt) < -1 ">{{ ( item.sum_debt - item.debt ) | toAR }}</span>
               </td>
+              <!--
               <td v-if="app_config.shader_name == 'amn1'">
                 {{item.pkg_count | toAR }}
               </td>
-              
+              -->
+              <td v-if="true">
+                {{item.net_rahn | toAR }}
+              </td>
               <td v-if=" flags.zm_mode" >
                 <span class="collect-box "></span>
               </td>

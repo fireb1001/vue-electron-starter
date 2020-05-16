@@ -48,6 +48,50 @@
         </form>
         </div>
       </b-collapse>
+
+      <div v-if=" shader_configs['shader_name'] == 'amn1'">
+        <div class="m-2" >
+          <h4>عدد {{packaging.count}} عداية في حساب المخزن بمبلغ {{packaging.amount}}</h4>
+        </div>
+        <button 
+        v-b-toggle.collapse_packaging class=" btn btn-success m-2" >
+          <span class="fa fa-box"></span> &nbsp; 
+        رد / سحب عدايات
+        </button>
+      <b-collapse id="collapse_packaging" style="padding:25px;" class="pr-hideme">
+        <div class="entry-form">
+          <form  @submit="addToPackaging">
+          <b-form-group label=" الحركة">
+            <b-form-radio-group  v-model="packaging_form.type">
+              <b-form-radio value="-"> سحب </b-form-radio>
+              <b-form-radio value="+"> رد </b-form-radio>
+            </b-form-radio-group>
+          </b-form-group>
+
+          <div class="form-group row">
+            <label  class="col-sm-2">عدد العدايات</label>
+            <div class="col-sm-10">
+              <input v-model="packaging_form.count" class="form-control "  placeholder="ادخل العدد">
+            </div>
+          </div>
+          <div class="form-group row">
+            سوف يتم 
+            &nbsp;
+            <span v-if="packaging_form.type == '+'"> اضافة </span>
+            <span v-else> خصم </span> &nbsp;
+            عدايات بمبلغ 
+            {{ +packaging_form.count * +shader_configs['pkg_price'] }} ج علي المخزن
+          </div>
+          <button type="submit" class="btn btn-success" >
+            <span v-if="packaging_form.type == '+'">رد</span>
+            <span v-else>سحب</span>
+          </button>
+
+          <button type="button" class="btn btn-danger mr-1"  v-b-toggle.collapse_packaging >  اغلاق</button>
+          </form>
+        </div>
+      </b-collapse>
+    </div>
     </div>
     <div class="col-7 table-responsive" >
       <h3 class="m-3">سجل المعاملات </h3>
@@ -111,6 +155,7 @@ import { CashflowDAO, CashflowCtrl } from '../ctrls/CashflowCtrl';
 import { MainMixin } from '../mixins/MainMixin';
 import AlertDay from '@/components/AlertDay.vue'
 import { DealersCtrl, DealerDAO, DealerTransDAO } from '../ctrls/DealersCtrl';
+import { PackagingCtrl, PackagingDAO } from '../ctrls/PackagingCtrl';
 
 Settings.defaultLocale = 'ar'
 Settings.defaultZoneName = 'UTC'
@@ -127,6 +172,8 @@ export default {
       confirm_step: [],
       dealersCtrl: new DealersCtrl(),
       trans_form: {trans_type: 'dealer_pay'},
+      packaging: {count: 0, amount: 0},
+      packaging_form:{amount:0, type:'+'},
     }
   },
   components:{
@@ -138,8 +185,25 @@ export default {
       let {dao, trans} = await this.dealersCtrl.getDealerDetails(this.dealer_id)
       this.dealer = dao
       this.dealer_trans = trans
+      this.packaging = await new PackagingCtrl().getPersonSum({dealer_id: this.dealer_id})
     },
-    async removeTrans(trans) {
+    async addToPackaging(evt) {
+      evt.preventDefault()
+      console.log(this.packaging_form)
+      await new PackagingCtrl().save(new PackagingDAO({
+        count: this.packaging_form.count,
+        amount: +this.packaging_form.count * +this.shader_configs['pkg_price'],
+        sum: this.packaging_form.type,
+        dealer_id: this.dealer.id,
+        notes: this.packaging_form.type == '+' ? 'رد ' : 'سحب ',
+        day: this.day.iso
+      }))
+
+      this.packaging_form = {count : 0 , type : '+'}
+      this.$root.$emit('bv::toggle::collapse', 'collapse_packaging')
+      await this.refresh_all()
+    },
+      async removeTrans(trans) {
       if( this.confirm_step[trans.id] ) {
         this.discard_success = await this.dealersCtrl.removeDealerTrans(trans.id)
         this.confirm_step = []

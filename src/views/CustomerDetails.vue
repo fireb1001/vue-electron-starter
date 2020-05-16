@@ -3,7 +3,8 @@
     <div class="col-4 pr-hideme">
         <button class="btn btn-primary d-print-none pr-hideme" @click="$router.go(-1)">
             <span class="fa fa-arrow-right"></span> &nbsp;   العودة
-        </button>
+        </button>#
+        {{customer.id}}
         <br />
 
         <h3 class="d-inline-block ">كشف مديونية / {{customer.name}}</h3>
@@ -47,7 +48,7 @@
     حركة نقدية : تحصيل / امانة 
   </button> 
 
-      <div v-if=" shader_configs['shader_name'] == 'amn1'">
+      <div v-if=" false && shader_configs['shader_name'] == 'amn1'">
         <div class="m-2" >
           <h4>عدد {{packaging.count}} عداية في حساب المخزن بمبلغ {{packaging.amount}}</h4>
         </div>
@@ -131,17 +132,6 @@
           </form>
         </div>
       </b-collapse>
-
-  <div>
-    <h3>عرض الحركات من يوم</h3>
-        <datetime 
-    v-model="show_trans_after" 
-    :auto="true" 
-    class="datetime" 
-    min-datetime="2019-01-01"
-    max-datetime="2030-01-01">
-    </datetime>
-  </div>
 
 
   <!-- Element to collapse -->
@@ -235,6 +225,17 @@
 
       <div class="table-responsive col-8 " v-if="flags.modal_closed">
 
+      <div>
+        <h3>عرض الحركات من يوم</h3>
+            <datetime 
+        v-model="show_trans_after" 
+        :auto="true" 
+        class="datetime" 
+        min-datetime="2019-01-01"
+        max-datetime="2030-01-01">
+        </datetime>
+      </div>
+
         <h1 class="pr-only">كشف مديونية  {{customer.name}}</h1>
         <div class="row m-2">
             <div class="col-sm-6">رصيد المديونية الحالي</div>
@@ -303,6 +304,14 @@
             </tr>
           </tbody>
         </table>
+        <div class="row m-2">
+          <div class="col-sm-6">  صافي الرهونات</div>
+          <div class="col-sm-6">
+            <b>
+            {{net_rahn | round | toAR}}
+            </b>
+          </div>
+        </div>
         <button class="btn btn-printo pr-hideme m-1" 
         @click="print_co()">
           <span class="fa fa-print"></span> طباعة كشف المديونية
@@ -506,6 +515,10 @@ hide-header hide-footer hide-header-close hide-backdrop>
         <h3 class="text-center" v-if="daily_out_trans[0]"> 
           {{'total_debt' | tr_label}} : {{sum_debt_cmpt | ceil5(app_config.shader_name) | toAR}}
         </h3>
+
+        <h3 class="text-center" > 
+          {{'صافي الرهونات' | tr_label}} : {{ net_rahn | toAR}}
+        </h3>
       </div>
 
       <span></span>
@@ -599,7 +612,6 @@ export default {
         this.self_rest_products = await this.customersCtrl.getRestInSelf(this.customer_id)
       }
       this.packaging = await new PackagingCtrl().getPersonSum({customer_id: this.customer_id})
-
     },
     async showOutModal(day = null){
       this.d_collect_form = {trans_type: "cust_collecting"}

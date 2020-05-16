@@ -1,12 +1,19 @@
--- 1.57
+-- 1.58
+update "shader_configs" set config_value='1.58' where config_name = 'MANUAL_UPGRADED_TO';
+INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category") 
+VALUES ('coll_cust_rahn', 'تحصيل رهن', 'default', '+', '', 'cashflow');
+-- product_rahn_external no map_packaging
 
-INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags", "cust_form") 
-VALUES ('init_pkg', 'عدايات لدي التاجر', 'default', '+', '', 'customer_trans', '', '', '', 'CUST_FORM', '1');
+-- 1.57
 
 -- map_cashflow cust_discount,anti_cust_discount
 
 alter TABLE packaging add COLUMN cashflow_id INTEGER;
 alter TABLE packaging add COLUMN out_scope INTEGER;
+
+
+INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags", "cust_form") 
+VALUES ('init_pkg', 'عدايات لدي التاجر', 'default', '+', '', 'customer_trans', '', '', '', 'CUST_FORM', '1');
 
 INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags") 
 VALUES ('pkg_destruct', 'اهلاك عدايات', 'default', '-', '', 'packaging', 'pkg_destruct,anti_pkg_destruct', '', '', '');
@@ -29,8 +36,6 @@ alter TABLE trans_types add COLUMN cust_form INTEGER;
 alter TABLE trans_types add COLUMN map_packaging TEXT;
 
 update trans_types set cust_form = 1 where flags = 'CUST_FORM';
-
-update "shader_configs" set config_value='1.56' where config_name = 'MANUAL_UPGRADED_TO';
 
 INSERT INTO shader_configs ("config_name", "config_value", "config_verify", "shader_name", "category") 
 VALUES ('pkg_price', '10', '', 'amn1', 'config');

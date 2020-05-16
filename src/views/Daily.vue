@@ -31,6 +31,7 @@ export default {
   },
   methods: {
     async change_luxon_date(date){
+      console.log('change_luxon_date')
       await this.change_day(date)
     }
   },

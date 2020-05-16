@@ -153,11 +153,29 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
     ${options.softDelete ? " and deleted_at is null" : ""}
      ) customers_g
    ON customer_trans_g.customer_id = customers_g.id 
+   /*
    LEFT JOIN (
     select customer_id, sum(count) pkg_count, sum(amount) pkg_amount from packaging 
     where out_scope !=1 or out_scope is null  GROUP by customer_id
   ) cust_pkg
   ON  customers_g.id  = cust_pkg.customer_id
+  */
+  LEFT JOIN (
+	  select customer_id, sum( amount ) net_rahn 
+		from customer_trans 
+		where trans_type in (
+		  'repay_cust_rahn',
+		  'repay_rahn_in',
+		  'rahn_down',
+		  'product_rahn_external',
+		  'product_rahn',
+		  'repay_rahn_internal',
+		  'repay_rahn_auto',
+		  'add_rahn_auto',
+		  'repay_rahn_cash'
+	) GROUP BY customer_id
+) cust_net_rahn
+ON cust_net_rahn.customer_id = customers_g.id 
    `;
    if(! options.noOrderByName) query +=
    `${ options.orderByDebt ? 'order by debt desc' : 'order by name '}`

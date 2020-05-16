@@ -67,7 +67,12 @@ export class PackagingCtrl {
       count = result.count
       amount = result.amount
     }
-
+    else if (filter.dealer_id){
+      let raw_sql = `select sum(count) count, sum(amount) amount from packaging where dealer_id =${filter.dealer_id}`;
+      let [result] = await knex.raw(raw_sql);
+      count = result.count
+      amount = result.amount
+    }
     return {count: +count, amount: +amount}
   }
 
