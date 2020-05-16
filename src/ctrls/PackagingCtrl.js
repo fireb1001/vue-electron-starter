@@ -89,6 +89,25 @@ export class PackagingCtrl {
     return result
   }
 
+  async getAllCounts() {
+    let [result] = await knex.raw(`select
+    sum(count_purchase) sum_purchase ,
+    sum(count_destruct) sum_destruct ,
+    sum(count_suppliers) sum_suppliers ,
+    sum(count_customers) sum_customers ,
+    sum(count_dealers) sum_dealers 
+    from ( 
+    select 
+      case when supplier_id is null and dealer_id is null and customer_id is null and sum = '+' then count END count_purchase,
+      case when supplier_id is null and dealer_id is null and customer_id is null and sum = '-' then count END count_destruct,
+      case when supplier_id IS NOT NULL then count END count_suppliers,
+      case when customer_id IS NOT NULL then count END count_customers,
+      case when dealer_id IS NOT NULL then count END count_dealers
+    from packaging
+    )`);
+    return result;
+  }
+
   async findAll(filter = {}, orderBy = '') {
     let all = await this.model
       .where(filter)

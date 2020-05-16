@@ -1,6 +1,35 @@
 <template>
   <section class="template m-3 row">
     
+    <div style="width:100%">
+      <table class="table table-bordered mt-1 pr-hideme">
+        <tr>
+          <th>   عدد العدايات التي تم شرائها</th>
+          <td>{{pkg_totals.sum_purchase | toAR}}</td>
+        </tr>
+        <tr>
+          <th>عدايات فلاحين</th>
+          <td>{{pkg_totals.sum_suppliers | toAR}}</td>
+
+          <th> عدايات تجار</th>
+          <td>{{pkg_totals.sum_customers | toAR}}</td>
+
+          <th> عدايات معاملات</th>
+          <td>{{pkg_totals.sum_dealers | toAR}}</td>
+        </tr>
+        <tr>
+          <th>   عدد العدايات التي تم اهلاكها</th>
+          <td>{{pkg_totals.sum_destruct | toAR}}</td>
+        </tr>
+        <tr>
+          <th>  صافي العدايات</th>
+          <td>{{pkg_totals.net_all | toAR}}</td>
+        </tr>
+      </table>
+      <hr>
+    </div>
+
+    <div class=" row" style="width:100%">
     <div class="col-5 d-print-none">
       <button class="btn btn-success" 
         v-b-toggle.collapse_cash >حركات المخزن </button>
@@ -128,6 +157,7 @@
         </table>
       </div>
     </div>
+    </div>
   </section>
 </template>
 <script>
@@ -140,6 +170,14 @@ export default {
   data() {
     return {
       pkg_trans: [],
+      pkg_totals: {
+        sum_purchase: 0,
+        sum_destruct: 0,
+        sum_suppliers: 0,
+        sum_customers: 0,
+        sum_dealers: 0,
+        net_all: 0
+      },
       confirm_step: [],
       pkg_form: {
         type:'',
@@ -227,7 +265,13 @@ export default {
       this.pkg_trans.push(new PackagingDAO({count: init_stock.count,amount: init_stock.amount, notes: 'رصيد'}))
       let today_trans = await new PackagingCtrl().findAll({day: this.day.iso}, 'id');
       this.pkg_trans.push(...today_trans);
-      console.log(this.pkg_trans)
+      this.pkg_totals = await new PackagingCtrl().getAllCounts()
+      this.pkg_totals.net_all = 
+      +this.pkg_totals.sum_purchase + 
+      +this.pkg_totals.sum_destruct +
+      +this.pkg_totals.sum_suppliers +
+      +this.pkg_totals.sum_customers +
+      +this.pkg_totals.sum_dealers ;
     }
   },
   async mounted() {
