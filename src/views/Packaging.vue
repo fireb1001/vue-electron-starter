@@ -11,19 +11,18 @@
           <th>عدايات فلاحين</th>
           <td>{{pkg_totals.sum_suppliers | toAR}}</td>
 
-          <th> عدايات تجار</th>
-          <td>{{pkg_totals.sum_customers | toAR}}</td>
-
+          <th> </th>
+          
+          <th> مبلغ اجمالي صافي الرهونات للتجار</th>
+          <td>{{sum_net_rahn | toAR}}</td>
+          </tr>
+        <tr>
           <th> عدايات معاملات</th>
           <td>{{pkg_totals.sum_dealers | toAR}}</td>
         </tr>
         <tr>
           <th>   عدد العدايات التي تم اهلاكها</th>
           <td>{{pkg_totals.sum_destruct | toAR}}</td>
-        </tr>
-        <tr>
-          <th>  صافي العدايات</th>
-          <td>{{pkg_totals.net_all | toAR}}</td>
         </tr>
       </table>
       <hr>
@@ -165,6 +164,7 @@ import { MainMixin } from '../mixins/MainMixin'
 import { PackagingCtrl, PackagingDAO} from '../ctrls/PackagingCtrl'
 import { TransTypesCtrl } from '../ctrls/TransTypesCtrl'
 import { CashflowDAO, CashflowCtrl } from '../ctrls/CashflowCtrl'
+import { CustomersCtrl } from '../ctrls/CustomersCtrl'
 export default {
   name: 'packaging',
   data() {
@@ -178,6 +178,7 @@ export default {
         sum_dealers: 0,
         net_all: 0
       },
+      sum_net_rahn: 0,
       confirm_step: [],
       pkg_form: {
         type:'',
@@ -272,6 +273,8 @@ export default {
       +this.pkg_totals.sum_suppliers +
       +this.pkg_totals.sum_customers +
       +this.pkg_totals.sum_dealers ;
+
+      this.sum_net_rahn = await new CustomersCtrl().getSumNetRahn();
     }
   },
   async mounted() {

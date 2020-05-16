@@ -100,7 +100,7 @@ export class PackagingCtrl {
     select 
       case when supplier_id is null and dealer_id is null and customer_id is null and sum = '+' then count END count_purchase,
       case when supplier_id is null and dealer_id is null and customer_id is null and sum = '-' then count END count_destruct,
-      case when supplier_id IS NOT NULL then count END count_suppliers,
+      case when supplier_id IS NOT NULL and ( out_scope !=1 or out_scope is null) then count END count_suppliers,
       case when customer_id IS NOT NULL then count END count_customers,
       case when dealer_id IS NOT NULL then count END count_dealers
     from packaging
