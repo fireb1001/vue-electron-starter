@@ -1,3 +1,4 @@
+-- https://drive.google.com/file/d/1fcfQOvo-kKO0PPBlR5lgv0FAi27lSEWO/view?usp=sharing
 -- 1.58
 update "shader_configs" set config_value='1.58' where config_name = 'MANUAL_UPGRADED_TO';
 INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category") 
