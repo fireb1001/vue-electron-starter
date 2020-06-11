@@ -173,6 +173,7 @@ export class SuppliersCtrl {
     /*
     let all = await this.model.where(filter).fetchAll(options)
     return all.map( _=> new SupplierDAO(_.attributes))
+
     */
     console.log(options)
     let SQL = `
@@ -210,7 +211,14 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
   }
 
   async sumDebt(){
-    let result = await knex.raw(`select sum(balance) as sum_debt from suppliers where deleted_at is null`)
+    let sql = `
+    select sum(sum_debt) as sum_debt from (select * from suppliers where deleted_at is null) suppliers_g
+    LEFT JOIN ( 
+      select supplier_id, sum(amount) as sum_debt from supplier_trans group by supplier_id 
+    ) supplier_trans_g
+    ON suppliers_g.id = supplier_trans_g.supplier_id 
+    `;
+    let result = await knex.raw(sql)
     return result.length > 0 ? result[0] : null
   }
 

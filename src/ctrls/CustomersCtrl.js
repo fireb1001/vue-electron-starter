@@ -204,7 +204,10 @@ ON cust_net_rahn.customer_id = customers_g.id
 
   async sumDebt() {
     let result = await knex.raw(
-      `select sum(debt) as sum_debt from customers where deleted_at is null and (is_self is null or is_self = 0)`
+      `select sum(sum_debt) as sum_debt from
+      (select * from customers where deleted_at is null and (is_self is null or is_self = 0) )customers_g
+      LEFT JOIN  (select customer_id, sum(amount) as sum_debt from customer_trans group by customer_id ) customer_trans_g
+      ON customers_g.id = customer_trans_g.customer_id `
     );
     return result.length > 0 ? result[0] : null;
   }
