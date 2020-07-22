@@ -94,6 +94,12 @@
     </div>
     </div>
     <div class="col-7 table-responsive" >
+      <div>
+        <button class="btn btn-printo pr-hideme" 
+          @click="print_co();">
+          <span class="fa fa-print"></span> طباعة
+        </button>
+      </div>
       <h3 class="m-3">سجل المعاملات </h3>
         <table class="table table-striped pr-me">
           <thead>
