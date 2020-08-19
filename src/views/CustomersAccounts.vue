@@ -15,6 +15,7 @@
       class="col-5 btn btn-lg m-2 btn-block text-primary d-print-none pr-hideme" >
         &nbsp; 
         عرض حساب البياع - {{outgoing.customer_name}} 
+        <div style="color: black">اجمالي الدين: {{outgoing.customer_debt | round | toAR }} </div>
       </router-link>
       <button class="col-5 m-1 btn btn-lg d-print-none pr-hideme " 
       :class="{ 'btn-danger': ! printed_all[outgoing.customer_id], 'btn-primary': printed_all[outgoing.customer_id]}"

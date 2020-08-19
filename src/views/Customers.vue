@@ -355,7 +355,8 @@ export default {
         {debt_g_than: this.flags.show_g_than},
         {
           softDelete: soft_delete, 
-          orderByDebt: this.app_config.shader_name != 'nada' 
+          orderByDebt: this.app_config.shader_name != 'nada' && this.app_config.shader_name != 'mmn1', 
+          orderByTransDay: this.app_config.shader_name == 'mmn1' 
         }
       )
       else {
@@ -371,7 +372,8 @@ export default {
       this.flags.show_g_than = false
       let soft_delete = this.flags.show_active
       this.customers_arr = await this.customersCtrl.findAll({},{softDelete: soft_delete, 
-        orderByDebt: this.app_config.shader_name != 'nada' 
+          orderByDebt: this.app_config.shader_name != 'nada' && this.app_config.shader_name != 'mmn1', 
+          orderByTransDay: this.app_config.shader_name == 'mmn1' 
       })
     },
     fresh_form(){

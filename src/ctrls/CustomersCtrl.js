@@ -144,7 +144,7 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
    console.log("options", options)
    let query = `
    select * from 
-   (select customer_id, sum(amount) as sum_debt from customer_trans 
+   (select customer_id, sum(amount) as sum_debt, max(day) as trans_day from customer_trans 
    group by customer_id 
    ${filter.debt_g_than ? " having sum(amount)> "+ parseInt(filter.debt_g_than) : ""}
    ) customer_trans_g
@@ -177,8 +177,10 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
 ) cust_net_rahn
 ON cust_net_rahn.customer_id = customers_g.id 
    `;
+
    if(! options.noOrderByName) query +=
-   `${ options.orderByDebt ? 'order by debt desc' : 'order by name '}`
+   `${ options.orderByDebt ? 'order by debt desc ' : ''}
+   ${ options.orderByTransDay ? 'order by trans_day ' : 'order by name ' }`
 
    query +=`${filter.limit ? "limit " + parseInt(filter.limit) : ""}`
 
@@ -209,6 +211,17 @@ ON cust_net_rahn.customer_id = customers_g.id
       LEFT JOIN  (select customer_id, sum(amount) as sum_debt from customer_trans group by customer_id ) customer_trans_g
       ON customers_g.id = customer_trans_g.customer_id `
     );
+    return result.length > 0 ? result[0] : null;
+  }
+
+  async getCustomerSumDebt(customer_id) {
+    console.log(`select sum(amount) as sum_debt from
+    customer_trans where customer_id = ${customer_id}`)
+    let result = await knex.raw(
+      `select sum(amount) as sum_debt from
+      customer_trans where customer_id = ${customer_id}`
+    );
+
     return result.length > 0 ? result[0] : null;
   }
 

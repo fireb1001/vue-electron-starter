@@ -17,6 +17,7 @@ export class OutgoingDAO {
   product_name
   customer_id  
   customer_name
+  customer_debt
   sell_comm
   product_rahn
   sell_comm_value
@@ -40,6 +41,7 @@ export class OutgoingDAO {
     delete this.supplier_name
     delete this.product_name
     delete this.customer_name
+    delete this.customer_debt
     delete this.sum_count
     delete this.sum_weight
     delete this.total_weight
@@ -61,7 +63,6 @@ export class OutgoingsCtrl {
   model
   /**@type {TransTypesCtrl} */
   transTypesCtrl
-
 
   constructor() {
     this.model = require('../models/OutgoingsModel')(bookshelf)
@@ -205,18 +206,37 @@ export class OutgoingsCtrl {
     return last_kg_price
   }
 
+    // To solve foreach async problem
+    async asyncEach(array, callback) {
+      for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index);
+      }
+    }
+
   async findDailyCustomers(filter = {day:'',}) {
     let all = await this.model.query(q => {
       q.distinct('customer_id')
       q.whereNotNull('customer_id')
-    }).where(filter).orderBy('customer_id','ASC').fetchAll({withRelated: ['customer','customers_daily']})
+    }).where(filter).orderBy('customer_id','ASC').fetchAll({withRelated: ['customer','customers_daily']});
 
-    return all.map( _=> {
+
+    let allDailyCustomers = all.map(  _ => {
       let outDAO = new OutgoingDAO(_.attributes)
       outDAO.customer_name = _.related('customer').get('name')
       outDAO.printed =  _.related('customers_daily').get('printed')
       return outDAO
-    })
+    });
+
+    let allWithDebt = []
+    await this.asyncEach(allDailyCustomers, async item => {
+      if(item.customer_id) {
+        let {sum_debt} = await new CustomersCtrl().getCustomerSumDebt(item.customer_id);
+        item.customer_debt = sum_debt
+        allWithDebt.push(item);
+      }
+    });
+
+    return allWithDebt;
   }
 
   async findSuppDaySums(filter = {supplier_id: null, day: null}){
