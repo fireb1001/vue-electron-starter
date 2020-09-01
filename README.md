@@ -34,10 +34,11 @@ npm run postinstall
 - Fixed sell_comm per product / or flexi receipts
 - Products can't be edited
 
-
 ## Business TODOS
+
 - يجب تحصيل خصم التاجر في النقدية 
 - مراجعة النوالين مع الفواتير
+- what else
 
 ## Tools And Resources
 
