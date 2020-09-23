@@ -24,6 +24,7 @@ import DailyExpenses from "./views/DailyExpenses.vue";
 import CtgReceipts from "./views/CtgReceipts.vue";
 import SuppIncDetails from "./views/SuppIncDetails.vue";
 import Packaging from "./views/Packaging.vue";
+import CapitalSums from "./views/CapitalSums.vue";
 
 Vue.use(Router);
 
@@ -67,6 +68,11 @@ export default new Router({
       path: "/daily_expenses",
       name: "daily_expenses",
       component: DailyExpenses
+    },
+    {
+      path: "/capital_sums",
+      name: "capital_sums",
+      component: CapitalSums
     },
     {
       path: "/ctg_receipts",

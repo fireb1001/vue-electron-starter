@@ -180,7 +180,9 @@ ON cust_net_rahn.customer_id = customers_g.id
 
    if(! options.noOrderByName) query +=
    `${ options.orderByDebt ? 'order by debt desc ' : ''}
-   ${ options.orderByTransDay ? 'order by trans_day ' : 'order by name ' }`
+   ${ options.orderByTransDay ? 'order by trans_day ' : '' }
+   ${ options.orderByName ? 'order by name ' : '' }
+   `
 
    query +=`${filter.limit ? "limit " + parseInt(filter.limit) : ""}`
 

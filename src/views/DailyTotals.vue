@@ -462,8 +462,8 @@ sum_rahn_increase
               <td v-if="show_totals.includes('net_income_no_diff')" >
                 <span 
                 :class="{'text-primary': ! netinc_paid_days[item.day], 'text-success': netinc_paid_days[item.day], 'font-weight-bold': netinc_paid_days[item.day]}" 
-                @click="showIncomeModal(item.recp_sum_comm + item.out_sell_comm - item.sum_deducts, item.day)">
-                {{item.recp_sum_comm + item.out_sell_comm - item.sum_deducts | round }}
+                @click="showIncomeModal(item.net_income_no_diff, item.day)">
+                {{item.net_income_no_diff | round }}
                 </span>
               </td>
               <td v-else-if="show_totals.includes('net_income')" >
@@ -852,7 +852,7 @@ export default {
       this.flags.show_totals_confirm = true
     this.show_totals = this.shader_configs['show_totals'] ? this.shader_configs['show_totals'] : ''
     this.show_totals = this.show_only == 'rahn' ? 'rahn,repay_rahn,rahn_incr' : this.show_totals
-    this.show_totals = this.show_only == 'revenue' ? 'comms,recp_diff,out_cashflow,net_income_no_diff' : this.show_totals
+    this.show_totals = this.show_only == 'revenue' ? 'comms,out_cashflow,net_income_no_diff' : this.show_totals
     this.refresh_all()
   },
   props: ['show_only'],

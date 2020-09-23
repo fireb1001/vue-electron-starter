@@ -190,7 +190,7 @@ export default {
     },
     async new_supplier(search ) {
       this.supplier_search = (search && search != 'new') ? search : this.supplier_search
-      if(search == 'new') {
+      if(search == 'new' && this.supplier_search.trim()) {
         console.log(this.supplier_search)
         let newsupplier_id = await new SuppliersCtrl().save(new SupplierDAO({name: this.supplier_search }))
         this.active_suppliers = await new SuppliersCtrl().findAll({},{softDelete: true})
@@ -200,7 +200,7 @@ export default {
     },
     async new_product(search) {
       this.product_search = (search && search != 'new') ? search : this.product_search
-      if(search == 'new') {
+      if(search == 'new' && this.product_search.trim()) {
         console.log(this.product_search)
         let product_id = await new ProductsCtrl().save(new ProductDAO({name: this.product_search ,
         product_sell_comm: this.shader_configs['product_sell_comm'] 

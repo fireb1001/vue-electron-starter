@@ -450,7 +450,7 @@ export default {
     },
     async new_customer(search) {
       this.customer_search = (search && search != 'new') ? search : this.customer_search
-      if(search == 'new') {
+      if(search == 'new' && this.customer_search.trim()) {
         console.log(this.customer_search)
         let new_customer_id = await new CustomersCtrl().save(new CustomerDAO({name: this.customer_search }))
         this.active_customers = await this.customersCtrl.findAll({},{softDelete: true})

@@ -1,4 +1,4 @@
-import { bookshelf } from '../main'
+import { bookshelf, knex } from '../main'
 
 export class ProductDAO {
     id
@@ -64,6 +64,11 @@ export class ProductsCtrl {
     else
       return null
   }
+
+  async permenentDeleteById(id) {
+    await knex.raw(`delete from products where id = ${id}`);
+  }
+
 
   async resotreById(id) {
     /**@type import('bookshelf').ModelBase */

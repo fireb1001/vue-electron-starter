@@ -121,6 +121,11 @@
                   <template v-if="! confirm_step[item.id]"> استرجاع</template>
                   <template v-if="confirm_step[item.id]"> تأكيد </template>
                 </button>
+                                <button class="btn text-danger" @click="archive(item.id, 'PERMANENT')" v-if="item.deleted_at">
+                  <span class="fa fa-undo "></span> 
+                  <template v-if="! confirm_step[item.id]"> حذف نهائي</template>
+                  <template v-if="confirm_step[item.id]"> تأكيد </template>
+                </button>
                <button class="btn text-primary" @click="edit(item.id)" v-if="! item.deleted_at">
                   تعديل
                 </button>
@@ -180,6 +185,8 @@ export default {
       if( this.confirm_step[id] ) {
         if(restore === 'RESTORE')
           await this.productsCtrl.resotreById(id)
+        else if ( restore === 'PERMANENT')
+          await this.productsCtrl.permenentDeleteById(id)
         else
           await this.productsCtrl.deleteById(id)
         this.confirm_step = []

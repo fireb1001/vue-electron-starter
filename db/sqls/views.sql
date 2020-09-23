@@ -79,74 +79,95 @@ FROM
 
 -- v_daily_sums --
 DROP VIEW if EXISTS  v_daily_sums;
-CREATE VIEW v_daily_sums AS
-SELECT days.day as day,
-recp_sum_net,
-recp_sum_given,
-recp_sum_rasd_net,
-recp_sum_comm,
-recp_sum_expenses,
-recp_sum_deducts,
-recp_sum_others,
-recp_sum_sale,
-sum_out_value,
-out_sell_comm,
-out_zm_val,
-sum_collect_zm,
-sum_cash_zm,
-sum_deducts,
-sum_given,
-sum_nolon,
-sum_supp_payment,
-sum_supp_collect,
-sum_product_rahn,
-sum_mashal,
-sum_repay_rahn,
-sum_rahn_down,
-sum_rahn_increase
-FROM
-	( select DISTINCT day from outgoings UNION select DISTINCT day from incomings UNION select DISTINCT day from cashflow ) days
-LEFT JOIN 
-	(select day,
-	round(sum(recp_given),2) recp_sum_given,
-	round(sum(recp_comm),2) recp_sum_comm,
-	round(sum(net_value),2) recp_sum_net,
-	sum(sale_value) recp_sum_sale,
-	sum(recp_expenses) recp_sum_expenses,
-	sum(recp_deducts) recp_sum_deducts,
-	sum(recp_others) recp_sum_others,
-	round(sum(CASE  WHEN recp_paid = 1 THEN net_value ELSE 0 END),2) recp_sum_rasd_net
-	FROM receipts GROUP By day ) recp_day_g
-	ON days.day = recp_day_g.day
-LEFT JOIN 
-	(select day,
-	sum(case when state = 'given' then amount else null end) as sum_given,
-	sum(case when state = 'nolon' then amount else null end) as sum_nolon,
-	sum(case when state = 'rahn_down' then amount else null end) as sum_rahn_down,
-	sum(case when state = 'rahn_increase' then amount else null end) as sum_rahn_increase,
-	sum(case when state in ('cust_advance_pay','acc_rest') then amount else null end) as sum_cash_zm,
-	sum(case when state in ('collecting','cust_collecting','cust_in_collecting') then amount else null end) as sum_collect_zm,
-	sum(case when state = 'supp_payment' then amount else null end) as sum_supp_payment,
-             sum(case when state = 'supp_collect' then amount else null end) as sum_supp_collect,
-	sum(case when state in (select name FROM trans_types where category = 'cashflow' and optional = 1) then amount else null end) sum_deducts
-	from cashflow  GROUP by day ) cash_deducts
-	ON  days.day = cash_deducts.day
-LEFT JOIN 
-	(select day,
-	sum(case when trans_type = 'product_rahn' then amount else null end) as sum_product_rahn,
-	sum(case when trans_type = 'mashal' then amount else null end) as sum_mashal,
-	abs(sum(case when trans_type in ( 'repay_cust_rahn','repay_rahn_in','repay_rahn_internal') then amount else null end)) as sum_repay_rahn
-	from customer_trans group by day ) cust_rahn_g
-	ON  days.day = cust_rahn_g.day
-LEFT JOIN
-	(select day, sum(sell_comm * count) out_sell_comm FROM outgoings GROUP By day) outgoings_day_g
-	ON days.day = outgoings_day_g.day
-LEFT JOIN 
-	(select day, sum(value_calc) out_zm_val FROM outgoings where customer_id > 0 GROUP By day) outgoings_zm
-	ON days.day = outgoings_zm.day
-LEFT JOIN
-	(select income_day, sum(kg_price *weight) sum_out_value FROM outgoings GROUP By income_day) outg_incday_g
-	ON days.day = outg_incday_g.income_day;
+CREATE VIEW v_daily_sums
+AS
+	SELECT days.day as day,
+		recp_sum_net,
+		recp_sum_given,
+		recp_sum_rasd_net,
+		recp_sum_comm,
+		recp_sum_expenses,
+		recp_sum_deducts,
+		recp_sum_others,
+		recp_sum_sale,
+		sum_out_value,
+		out_sell_comm,
+		out_zm_val,
+		sum_collect_zm,
+		sum_cash_zm,
+		sum_deducts,
+		sum_given,
+		sum_nolon,
+		sum_supp_payment,
+		sum_supp_collect,
+		sum_product_rahn,
+		sum_mashal,
+		sum_repay_rahn,
+		sum_rahn_down,
+		sum_rahn_increase,
+		(recp_sum_comm + out_sell_comm - sum_deducts) as net_income_no_diff
+	FROM
+		( 					select DISTINCT day
+			from outgoings
+		UNION
+			select DISTINCT day
+			from incomings
+		UNION
+			select DISTINCT day
+			from cashflow ) days
+		LEFT JOIN
+		(select day,
+			round(sum(recp_given),2) recp_sum_given,
+			round(sum(recp_comm),2) recp_sum_comm,
+			round(sum(net_value),2) recp_sum_net,
+			sum(sale_value) recp_sum_sale,
+			sum(recp_expenses) recp_sum_expenses,
+			sum(recp_deducts) recp_sum_deducts,
+			sum(recp_others) recp_sum_others,
+			round(sum(CASE  WHEN recp_paid = 1 THEN net_value ELSE 0 END),2) recp_sum_rasd_net
+		FROM receipts
+		GROUP By day ) recp_day_g
+		ON days.day = recp_day_g.day
+		LEFT JOIN
+		(select day,
+			sum(case when state = 'given' then amount else null end) as sum_given,
+			sum(case when state = 'nolon' then amount else null end) as sum_nolon,
+			sum(case when state = 'rahn_down' then amount else null end) as sum_rahn_down,
+			sum(case when state = 'rahn_increase' then amount else null end) as sum_rahn_increase,
+			sum(case when state in ('cust_advance_pay','acc_rest') then amount else null end) as sum_cash_zm,
+			sum(case when state in ('collecting','cust_collecting','cust_in_collecting') then amount else null end) as sum_collect_zm,
+			sum(case when state = 'supp_payment' then amount else null end) as sum_supp_payment,
+			sum(case when state = 'supp_collect' then amount else null end) as sum_supp_collect,
+			sum(case when state in (select name
+			FROM trans_types
+			where category = 'cashflow' and optional = 1) then amount else null end) sum_deducts
+		from cashflow
+		GROUP by day ) cash_deducts
+		ON  days.day = cash_deducts.day
+		LEFT JOIN
+		(select day,
+			sum(case when trans_type = 'product_rahn' then amount else null end) as sum_product_rahn,
+			sum(case when trans_type = 'mashal' then amount else null end) as sum_mashal,
+			abs(sum(case when trans_type in ( 'repay_cust_rahn','repay_rahn_in','repay_rahn_internal') then amount else null end)) as sum_repay_rahn
+		from customer_trans
+		group by day ) cust_rahn_g
+		ON  days.day = cust_rahn_g.day
+		LEFT JOIN
+		(select day, sum(sell_comm * count) out_sell_comm
+		FROM outgoings
+		GROUP By day) outgoings_day_g
+		ON days.day = outgoings_day_g.day
+		LEFT JOIN
+		(select day, sum(value_calc) out_zm_val
+		FROM outgoings
+		where customer_id > 0
+		GROUP By day) outgoings_zm
+		ON days.day = outgoings_zm.day
+		LEFT JOIN
+		(select income_day, sum(kg_price *weight) sum_out_value
+		FROM outgoings
+		GROUP By income_day) outg_incday_g
+		ON days.day = outg_incday_g.income_day;
 
 -- v_out_sums
 DROP VIEW if EXISTS  v_out_sums;

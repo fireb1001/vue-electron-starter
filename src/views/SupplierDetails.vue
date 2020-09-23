@@ -316,12 +316,20 @@
                 <b>{{supp_trans_sums.total_debt | toAR}}</b>
               </td>
             </tr>
+
           </tbody>
         </table>
       </div>
       </section>
-      <h3 class="m-3">سجل فواتير العميل </h3>
-        <table class="table table-striped pr-me">
+        <div class="text-center">
+          <button class="btn btn-printo pr-hideme" @click="pr_short_togg(true);print_co();">
+            <span class="fa fa-print"></span>  طباعة كشف
+          </button>
+        </div>
+      
+      <div :class="{'pr-hideme':pr_short_mode}">
+        <h3 class="m-3">سجل فواتير العميل </h3>
+        <table class="table table-striped ">
           <thead>
             <tr>
               <th>م </th>
@@ -363,16 +371,12 @@
             </tr>
           </tbody>
         </table>
+        </div>
         <div class="m-3">اجمالي فواتير الرصد فقط = <b>{{ supp_recps_sums.total_rasd | ceil5(app_config.shader_name) | round | toAR}}</b> </div>
         <div class="text-center">
-        <button class="btn btn-printo pr-hideme"  @click="print_co">
-          <span class="fa fa-print"></span> طباعة
-        </button>
-          <!--
-          <button class="btn btn-printo pr-hideme" @click="vue_window.print()">
-            <span class="fa fa-print"></span> طباعة 
+          <button class="btn btn-printo pr-hideme"  @click="pr_short_togg(false);print_co();">
+            <span class="fa fa-print"></span> طباعة
           </button>
-          -->
         </div>
 
   </section>
@@ -409,7 +413,8 @@ export default {
       side_acc:{amount:0, type:'+'},
       suppliersCtrl: new SuppliersCtrl(),
       trans_form: {trans_type: 'supp_payment'},
-      yearly_closer: {year: new Date().getFullYear()}
+      yearly_closer: {year: new Date().getFullYear()},
+      pr_short_mode: false
     }
   },
   components:{
@@ -437,6 +442,9 @@ export default {
       await this.suppliersCtrl.deleteById(this.supplier_id)
       await this.suppliersCtrl.save(new SupplierDAO(newSupp))
       this.$router.push("suppliers");
+    },
+    async pr_short_togg(flag){
+      this.pr_short_mode = flag;
     },
     async removeRecp(recp) {
       console.log(recp)
