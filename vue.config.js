@@ -4,7 +4,7 @@ module.exports = {
         builderOptions: {
           // options placed here will be merged with default configuration and passed to electron-builder
           icon: 'src/assets/app_new.ico',
-          extraResources: ['./db/**/*','./assets/**/*'],
+          extraResources: ['./assets/**/*'],// removed './db/**/*',
           extraFiles: ['./progs/**/*']
         }
       }
@@ -13,9 +13,9 @@ module.exports = {
     configureWebpack:  {
         externals: {
           //sqlite3: 'sqlite3',
+          //'mysql': 'mysql',
           'mariasql': 'mariasql',
           'mssql': 'mssql',
-          'mysql': 'mysql',
           'oracle': 'oracle',
           'strong-oracle': 'strong-oracle',
           'oracledb': 'oracledb',

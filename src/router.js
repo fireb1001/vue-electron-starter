@@ -5,6 +5,7 @@ import Daily from "./views/Daily.vue";
 import Developer from "./views/Developer.vue";
 import Incomings from "./views/Incomings.vue";
 import Customers from "./views/Customers.vue";
+import CustomersMysql from "./views/CustomersMysql.vue";
 import Suppliers from "./views/Suppliers.vue";
 import Dealers from "./views/Dealers.vue";
 import Products from "./views/Products.vue";
@@ -168,6 +169,11 @@ export default new Router({
       path: "/in_cashflow",
       name: "in_cashflow",
       component: Cashflow
+    },
+    {
+      path: "/cust_mysql",
+      name: "cust_mysql",
+      component: CustomersMysql
     }
   ]
 });

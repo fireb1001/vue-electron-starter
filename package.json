@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service electron:serve",
-    "build": "vue-cli-service electron:build --ia32",
+    "build32": "vue-cli-service electron:build --ia32",
+    "build": "vue-cli-service electron:build ",
     "lint": "vue-cli-service lint",
     "postinstall": "electron-builder install-app-deps --arch=ia32",
     "postinstall64": "electron-builder install-app-deps ",
@@ -20,6 +21,7 @@
     "luxon": "^1.22.0",
     "moment": "^2.24.0",
     "mssql": "^5.1.0",
+    "mysql": "^2.18.1",
     "sqlite3": "^4.2.0",
     "vue": "^2.5.17",
     "vue-datetime": "^1.0.0-beta.10",

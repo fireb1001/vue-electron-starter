@@ -46,10 +46,23 @@ let sqlite_config = {
 const knex = require("knex")(sqlite_config);
 Object.defineProperty(knex, "name", { value: "knex" });
 
+const mysqlknex = require("knex")({
+  client: "mysql",
+  connection: {
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "shaderdb",
+  },
+});
+Object.defineProperty(mysqlknex, "name", { value: "knex" });
+
 let bookshelf = require("bookshelf")(knex);
 bookshelf.plugin(require("bookshelf-soft-delete"));
 
-export { knex, sqlite_config, bookshelf, MyStoreMutations, log };
+let bookshelfMysql = require("bookshelf")(mysqlknex);
+
+export { knex, mysqlknex ,bookshelfMysql, sqlite_config, bookshelf, MyStoreMutations, log };
 export * from "./tools";
 import { moment } from "./tools";
 

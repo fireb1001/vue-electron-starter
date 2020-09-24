@@ -105,6 +105,14 @@
                   {{ custom_labels['manage_customers'] }}
                 </router-link>
               </li>
+
+              <li class="nav-item">
+                <router-link class="nav-link active" to="/cust_mysql">
+                  <span class="fa fa-handshake"></span>
+                  Mysql Customers
+                </router-link>
+              </li>
+
               <li class="nav-item">
                 <router-link class="nav-link active" to="/products">
                   <span class="fa fa-apple-alt"></span>
