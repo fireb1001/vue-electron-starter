@@ -18,7 +18,7 @@ let mainWindow
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: {  secure: true } }]);
 
 function createMainWindow () {
-  const window = new BrowserWindow({ webPreferences: { webSecurity: false , nodeIntegration: true}, icon:  'assets/icon.png'  })
+  const window = new BrowserWindow({ webPreferences: { webSecurity: false , nodeIntegration: true, enableRemoteModule: true}, icon:  'assets/icon.png'  })
 
   if (isDevelopment) {
     // Load the url of the dev server if in development mode
