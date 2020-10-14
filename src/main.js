@@ -35,6 +35,7 @@ let app_config = {
 console.log(app_config);
 store.commit("setAppConfig", app_config);
 
+
 let sqlite_config = {
   client: "sqlite3",
   connection: {
@@ -43,10 +44,7 @@ let sqlite_config = {
   useNullAsDefault: true
 };
 
-const knex = require("knex")(sqlite_config);
-Object.defineProperty(knex, "name", { value: "knex" });
-
-const mysqlknex = require("knex")({
+const knex = require("knex")({
   client: "mysql",
   connection: {
     host: "localhost",
@@ -55,19 +53,31 @@ const mysqlknex = require("knex")({
     database: "shaderdb",
   },
 });
-Object.defineProperty(mysqlknex, "name", { value: "knex" });
+Object.defineProperty(knex, "name", { value: "knex" });
+
+// const knex = require("knex")(sqlite_config);
+// knexraw('select 1+1;').then((res) => console.log(res[0]));
+// let bookshelfMysql = require("bookshelf")(mysqlknex);
+
+async function selectRaw (sql, labeled ) {
+  if(labeled)
+    console.log(`=== selectRaw : ${labeled} ====\n`,sql)
+  let [results] = await knex.raw(sql);
+  return results;
+}
+
+async function execRaw(sql) {
+  await knex.raw(sql);
+}
 
 let bookshelf = require("bookshelf")(knex);
 bookshelf.plugin(require("bookshelf-soft-delete"));
 
-let bookshelfMysql = require("bookshelf")(mysqlknex);
-
-export { knex, mysqlknex ,bookshelfMysql, sqlite_config, bookshelf, MyStoreMutations, log };
+export { knex , selectRaw, execRaw , bookshelf as bookshelfMysql, sqlite_config, bookshelf, MyStoreMutations, log };
 export * from "./tools";
 import { moment } from "./tools";
 
 Vue.filter("arDate", function(date, shader_name = '') {
-
   return moment(date).format(shader_name == 'mmn1' ? "L": "LL");
 });
 
@@ -182,7 +192,12 @@ Vue.filter("productsFilter", function(products, separator = " , ") {
 new Vue({
   router,
   store,
-  render: h => h(App)
+  render: h => h(App),
+  created: function () {
+    console.log("Vue instance created !")
+    // Prevent blank screen in Electron builds
+    // this.$router.push('/')
+  },
 }).$mount("#app");
 
 Vue.prototype.vue_window = window;

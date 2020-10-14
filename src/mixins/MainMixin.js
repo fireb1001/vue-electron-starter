@@ -1,6 +1,6 @@
 import { remote } from 'electron'
 import { mapState } from 'vuex'
-import { moment, knex } from '../main.js'
+import { moment, knex, selectRaw } from '../main.js'
 import { Settings, DateTime } from 'luxon'
 
 Settings.defaultLocale = 'ar'
@@ -38,8 +38,8 @@ export const MainMixin = {
       let dateTime = DateTime.fromISO(date)
       let iso = dateTime.toISODate()
       let old_day = this.$store.state.day.should_be
-      let [stricted] = await knex.raw(`select closed from daily_close where day = '${iso}'`);
-
+      let [stricted] = await selectRaw(`select closed from daily_close where day = '${iso}'`);
+      console.log('%c Mo2Log stricted ', 'background: #bada55',  stricted);
       if(dateTime.valueOf()) {
         this.$store.commit('setDay' ,{
           ts: dateTime.valueOf(),
@@ -51,7 +51,7 @@ export const MainMixin = {
         })
       }
       // get all stricted days
-      let all = await knex.raw(`select day,closed from daily_close`);
+      let all = await selectRaw(`select day,closed from daily_close`);
       let assos = all.reduce((a,b)=>{
         a[b.day]= b.closed == 'true'
         return a;

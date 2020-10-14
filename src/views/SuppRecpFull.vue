@@ -320,7 +320,7 @@ import { ReceiptDAO, ReceiptsCtrl } from '../ctrls/ReceiptsCtrl'
 import { OutgoingsCtrl } from '../ctrls/OutgoingsCtrl'
 import {  SuppliersCtrl } from '../ctrls/SuppliersCtrl'
 import { MainMixin } from '../mixins/MainMixin'
-import {knex} from '../main'
+import {knex, selectRaw} from '../main'
 import AlertDay from '@/components/AlertDay.vue'
 
 export default {
@@ -393,8 +393,7 @@ export default {
         this.modal_recp = fresh_recp
       }
 
-      let [calc_debt] = await knex.raw(`select sum(amount) as curr_debt from supplier_trans where supplier_id = ${this.supplier_id}`);
-      console.log(calc_debt)
+      let [calc_debt] = await selectRaw(`select sum(amount) as curr_debt from supplier_trans where supplier_id = ${this.supplier_id}`);
       this.curr_debt = parseFloat(calc_debt.curr_debt)
     },
     async saveRecp(receipt = null){

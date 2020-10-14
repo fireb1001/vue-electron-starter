@@ -1,26 +1,26 @@
 <template>
   <section class="customers row">
-
-        <b-modal
-          id="pass-in"
-          hide-footer
-          no-close-on-esc
-          no-close-on-backdrop
-          hide-header-close
-          class="p-4"
-        >
-          <form @submit="passSubmit">
-            <p class="h4 text-center mb-4">ادخل كلمة المرور</p>
-            <br />
-            <label for="defaultFormLoginPasswordEx" class="grey-text">كلمة المرور</label>
-            <input type="password" v-model.lazy="password" class="form-control"/>
-            <div class="text-center mt-4">
-              <button class="btn btn-success" type="submit">عرض</button> 
-              <span>&nbsp;</span>
-              <button class="btn btn-danger" @click="$bvModal.hide('pass-in')">اغلاق</button> 
-            </div>
-          </form>
-        </b-modal>
+    
+    <b-modal
+      id="pass-in"
+      hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
+      hide-header-close
+      class="p-4"
+    >
+      <form @submit="passSubmit">
+        <p class="h4 text-center mb-4">ادخل كلمة المرور</p>
+        <br />
+        <label for="defaultFormLoginPasswordEx" class="grey-text">كلمة المرور</label>
+        <input type="password" v-model.lazy="password" class="form-control"/>
+        <div class="text-center mt-4">
+          <button class="btn btn-success" type="submit">عرض</button> 
+          <span>&nbsp;</span>
+          <button class="btn btn-danger" @click="$bvModal.hide('pass-in')">اغلاق</button> 
+        </div>
+      </form>
+    </b-modal>
 
     <div class="col-5 d-print-none" v-if="! flags.detailed">
           <br/>

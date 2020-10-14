@@ -1,4 +1,4 @@
-import { bookshelf, knex } from "../main";
+import { bookshelf, execRaw, knex, selectRaw } from "../main";
 import { store } from "../store";
 import { TransTypesCtrl } from "./TransTypesCtrl";
 import { CashflowCtrl } from "./CashflowCtrl";
@@ -183,11 +183,9 @@ ON cust_net_rahn.customer_id = customers_g.id
    ${ options.orderByTransDay ? 'order by trans_day ' : '' }
    ${ options.orderByName ? 'order by name ' : '' }
    `
-
    query +=`${filter.limit ? "limit " + parseInt(filter.limit) : ""}`
 
-    console.log(query)
-    let results = await knex.raw(query);
+    let results = await selectRaw(query, "find all customers");
     return results.map(_ => new CustomerDAO(_));
   }
 
@@ -207,24 +205,21 @@ ON cust_net_rahn.customer_id = customers_g.id
   }
 
   async sumDebt() {
-    let result = await knex.raw(
+    let [result] = await selectRaw(
       `select sum(sum_debt) as sum_debt from
       (select * from customers where deleted_at is null and (is_self is null or is_self = 0) )customers_g
       LEFT JOIN  (select customer_id, sum(amount) as sum_debt from customer_trans group by customer_id ) customer_trans_g
       ON customers_g.id = customer_trans_g.customer_id `
     );
-    return result.length > 0 ? result[0] : null;
+    return result;
   }
 
   async getCustomerSumDebt(customer_id) {
-    console.log(`select sum(amount) as sum_debt from
-    customer_trans where customer_id = ${customer_id}`)
-    let result = await knex.raw(
+    let [result] = await selectRaw(
       `select sum(amount) as sum_debt from
       customer_trans where customer_id = ${customer_id}`
     );
-
-    return result.length > 0 ? result[0] : null;
+    return result;
   }
 
   async getDailyOutTrans(filter = { id: null, day: "" }) {
@@ -252,7 +247,7 @@ ON cust_net_rahn.customer_id = customers_g.id
 
     /*
    // Grouping Transes
-    let daily_out_trans = await knex.raw(`select 
+    let [daily_out_trans] = await knexraw(`select 
 v_trans.id,
 v_trans.day,
 v_trans.customer_id,
@@ -284,7 +279,7 @@ GROUP by kg_price, v_outgoings.product_id, trans_type`);
       return transDAO;
     });
     /**/
-    let product_rahn_trans = await knex.raw(`select day, customer_id, trans_type, sum(amount) amount
+    let product_rahn_trans = await selectRaw(`select day, customer_id, trans_type, sum(amount) amount
     from customer_trans where customer_id= ${filter.id} and
     trans_type= 'product_rahn' and
     day= '${filter.day}'`);
@@ -296,7 +291,7 @@ GROUP by kg_price, v_outgoings.product_id, trans_type`);
   }
 
   async getCustomerTrans(filter = { id: null, day: "" }) {
-    let results = await knex.raw(`
+    let results = await selectRaw(`
 select null as id, day, notes, customer_id,null as cashflow_id,'+' as sum  ,sum(amount) as amount, 'sum_outgoing' as trans_type  from customer_trans 
 where customer_id = ${filter.id} and 
 (trans_type= 'outgoing' 
@@ -320,7 +315,7 @@ ORDER BY day
   }
 
   async getCustomerNetRahn(filter = { id: null }) {
-    let results = await knex.raw(`select sum( amount ) net_rahn 
+    let [result] = await selectRaw(`select sum( amount ) net_rahn 
     from customer_trans where customer_id = ${filter.id}
     and trans_type in (
       'repay_cust_rahn',
@@ -334,12 +329,11 @@ ORDER BY day
       'repay_rahn_cash'
     )
 `);
-    let net_rahn = results && results.length > 0 ? results[0].net_rahn : 0;
-    return net_rahn;
+    return result.net_rahn;
   }
 
   async getSumNetRahn() {
-    let results = await knex.raw(`select sum( amount ) net_rahn 
+    let [result] = await selectRaw(`select sum( amount ) as net_rahn 
     from customer_trans 
     where trans_type in (
       'repay_cust_rahn',
@@ -353,12 +347,11 @@ ORDER BY day
       'repay_rahn_cash'
     )
 `);
-    let net_rahn = results && results.length > 0 ? results[0].net_rahn : 0;
-    return net_rahn;
+    return result.net_rahn;
   }
 
   async getRestInSelf(customer_id) {
-    let results = await knex.raw(`
+    let results = await selectRaw(`
 select * from customer_trans where customer_id = ${customer_id} and trans_type = 'outgoing' and 
 (actual_sale is null or actual_sale = 0)
 `);
@@ -469,8 +462,8 @@ select * from customer_trans where customer_id = ${customer_id} and trans_type =
   }
 
   async permenentDeleteById(id) {
-    await knex.raw(`delete from customer_trans where customer_id = ${id}`);
-    await knex.raw(`delete from customers where id = ${id}`);
+    await execRaw(`delete from customer_trans where customer_id = ${id}`);
+    await execRaw(`delete from customers where id = ${id}`);
   }
 
   async resotreById(id) {

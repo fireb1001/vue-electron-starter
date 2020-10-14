@@ -74,6 +74,7 @@
     v-b-toggle.collapse_cash >اضافة جديد </button>
 
     <br/>
+
     <br/>
       <b-collapse id="collapse_cash" class="m-1">
         <div class="entry-form">
@@ -142,7 +143,7 @@ import { TransTypesCtrl } from '../ctrls/TransTypesCtrl';
 import CashflowTable from '@/components/CashflowTable.vue'
 import AlertDay from '@/components/AlertDay.vue'
 import { MainMixin } from '../mixins/MainMixin'
-import { knex } from '../main';
+import { execRaw, knex, selectRaw } from '../main';
 import { CustomersCtrl } from '../ctrls/CustomersCtrl';
 import { SuppliersCtrl } from '../ctrls/SuppliersCtrl';
 import { ReceiptsCtrl } from '../ctrls/ReceiptsCtrl';
@@ -198,21 +199,20 @@ export default {
       }
       this.cashflow_arr = await this.cashflowCtrl.findAll({sum: sum, day: this.$store.state.day.iso},'id')
       this.ex_items_arr = await this.cashflowCtrl.getExItems();
-      let day_count_res = await knex.raw(`SELECT sum(count) as sum_count FROM outgoings where day='${this.$store.state.day.iso}'`)
+      console.log("ex_items_arr", this.ex_items_arr)
+      let [day_count_res] = await selectRaw(`SELECT sum(count) as sum_count FROM outgoings where day='${this.$store.state.day.iso}'`)
+      this.day_count = day_count_res.sum_count ? day_count_res.sum_count : this.day_count
 
       let net_cash = await this.cashflowCtrl.getNetCash({day: this.day.iso})
       this.net_cash = net_cash
-
-      if(day_count_res && day_count_res [0] && day_count_res[0].sum_count)
-        this.day_count = day_count_res[0].sum_count
       
     },
     async reopen_day(){
-      let [{json}] = await knex.raw(`select json from daily_close where day='${this.day.iso}' `)
-      console.log(json)
+      let [{json}] = await selectRaw(`select json from daily_close where day='${this.day.iso}' `)
+      console.log('%c Mo2Log reopen_day json', 'background: #bada55', json );
       if(json) json = JSON.parse(json)
       json = { ...json, reason: this.reason}
-      await knex.raw(`update daily_close set closed='false', json='${JSON.stringify(json)}' where day = '${this.day.iso}'`)
+      await execRaw(`update daily_close set closed='false', json='${JSON.stringify(json)}' where day = '${this.day.iso}'`)
       await this.change_day(this.day.iso)
     },
     async addCashflow(evt) {
@@ -270,7 +270,7 @@ export default {
     
     let { sum_debt: cust_sum_debt } = await new CustomersCtrl().sumDebt()
     let {sum_debt: supp_sum_debt } = await new SuppliersCtrl().sumDebt()
-    let [ dealer_trans ]  = await knex.raw('select sum(amount) as sum_dealer_trans from dealer_trans');
+    let [dealer_trans]  = await selectRaw('select sum(amount) as sum_dealer_trans from dealer_trans');
     let sum_dealer_trans = dealer_trans && dealer_trans.sum_dealer_trans ? parseFloat(dealer_trans.sum_dealer_trans) : 0
     let net_cash = await this.cashflowCtrl.getNetCash({day: this.day.iso})
     this.net_cash = net_cash

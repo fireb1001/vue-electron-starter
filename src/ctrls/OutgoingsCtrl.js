@@ -1,4 +1,4 @@
-import { bookshelf, knex } from '../main'
+import { bookshelf, knex, selectRaw } from '../main'
 import { CustomersCtrl, CustomerTransDAO } from './CustomersCtrl'
 import { TransTypesCtrl } from './TransTypesCtrl';
 import { ProductsCtrl } from './ProductsCtrl';
@@ -201,9 +201,8 @@ export class OutgoingsCtrl {
   }
 
   async getLastKgPrice(product_id) {
-    let last_kg_price = await knex.raw(`SELECT kg_price from outgoings where product_id = ${product_id} ORDER BY id DESC LIMIT 1`)
-    last_kg_price = last_kg_price[0] ? parseFloat(last_kg_price[0].kg_price) : null
-    return last_kg_price
+    let [last_kg_price] = await selectRaw(`SELECT kg_price from outgoings where product_id = ${product_id} ORDER BY id DESC LIMIT 1`);
+    return last_kg_price ? parseFloat(last_kg_price.kg_price) : null;
   }
 
     // To solve foreach async problem

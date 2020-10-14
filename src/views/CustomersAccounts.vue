@@ -258,7 +258,7 @@ hide-header hide-footer hide-header-close hide-backdrop>
 
 <script >
 import { OutgoingsCtrl } from "../ctrls/OutgoingsCtrl";
-import { knex } from "../main";
+import { execRaw, knex, selectRaw } from "../main";
 import { MainMixin } from "../mixins/MainMixin";
 import { CustomersCtrl, CustomerTransDAO } from "../ctrls/CustomersCtrl";
 import { CashflowCtrl, CashflowDAO } from "../ctrls/CashflowCtrl";
@@ -309,7 +309,7 @@ export default {
   methods: {
     async refresh_all() {
       let outgoingsCtrl = new OutgoingsCtrl();
-      let printed = await knex.raw(
+      let printed = await selectRaw(
         `select customer_id, printed from customers_daily where day ='${this.day.iso}'`
       );
       printed.forEach(one => {
@@ -459,7 +459,7 @@ export default {
     },
     async print_done(outg_day, customer_id) {
       try {
-        await knex.raw(
+        await execRaw(
           `insert into customers_daily (customer_id, day, printed) values( ${customer_id} , '${outg_day}', 1)`
         );
       } catch (error) {

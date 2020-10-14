@@ -97,11 +97,14 @@ export default {
   async mounted() {
     console.log(this.shader_configs);
     try {
-      let [result] = await knex.raw('PRAGMA integrity_check;')
+      /*
+      let [result] = await knexraw('PRAGMA integrity_check;')
       console.log("integrity_check : ",result)
+      */
       await new ProductsCtrl().findAll()
       this.working_db = true
     } catch (error) {
+      console.error("mounted error for Developer")
       let if_exists_outp = await sync_exec(`IF exist ${this.$store.state.app_config.user_data_path}\\db\\shaderlite.db echo file_exists`)
       if(if_exists_outp.stdout.includes('file_exists')){
         this.removed_exists = true
@@ -181,7 +184,7 @@ export default {
       remote.getCurrentWindow().reload();
     },
     disconnect_db(){
-       knex.destroy()
+      knex.destroy()
     },
     async checkAll(){
       

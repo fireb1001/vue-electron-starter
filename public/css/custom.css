@@ -2,3 +2,11 @@
   font-family: Tajawal;
   src: url(../webfonts/Tajawal.ttf);
 }
+
+.top-nav {
+  list-style: none;
+}
+.top-nav a.dropdown-toggle{
+  color:white;
+  direction: ltr;
+}

@@ -1,4 +1,4 @@
-import { bookshelf, knex } from '../main'
+import { bookshelf, execRaw, knex, selectRaw } from '../main'
 import { store } from '../store'
 import { TransTypesCtrl } from './TransTypesCtrl'
 
@@ -194,9 +194,7 @@ ON  suppliers_g.id = supp_pkg.supplier_id
 ${options.orderByBalance ? 'order by balance desc' : ''}
 ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
 `
-    let results = await knex.raw(SQL)
-    console.log(SQL)
-
+    let results = await selectRaw(SQL);
     return results.map( _=> {return new SupplierDAO(_)})
   }
 
@@ -218,8 +216,8 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
     ) supplier_trans_g
     ON suppliers_g.id = supplier_trans_g.supplier_id 
     `;
-    let result = await knex.raw(sql)
-    return result.length > 0 ? result[0] : null
+    let [result] = await selectRaw(sql)
+    return result;
   }
 
   async getSupplierDetails(id){
@@ -258,8 +256,8 @@ ${filter.limit ? "limit " + parseInt(filter.limit) : ""}
   }
 
   async permenentDeleteById(id) {
-    await knex.raw(`delete from supplier_trans where supplier_id = ${id}`);
-    await knex.raw(`delete from suppliers where id = ${id}`)
+    await execRaw(`delete from supplier_trans where supplier_id = ${id}`);
+    await execRaw(`delete from suppliers where id = ${id}`)
   }
 
 

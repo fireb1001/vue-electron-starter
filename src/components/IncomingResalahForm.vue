@@ -111,7 +111,7 @@ import { SuppliersCtrl, SupplierDAO } from '../ctrls/SuppliersCtrl';
 import { IncomingsCtrl,IncomingsData } from '../ctrls/IncomingsCtrl'
 import { MainMixin } from '../mixins/MainMixin'
 import { ProductsCtrl, ProductDAO } from '../ctrls/ProductsCtrl';
-import { MyStoreMutations, knex } from '../main'
+import { MyStoreMutations, knex, execRaw } from '../main'
 import { CashflowCtrl, CashflowDAO } from '../ctrls/CashflowCtrl';
 
 export default {
@@ -173,8 +173,10 @@ export default {
           if(this.shader_configs['F_STRICT_MODE']) {
             // INSERT INTO daily_close ("day", "closed", "net_cash") VALUES ('2020-02-01', 'true', '2000.0');
             try {
-              await knex.raw(`INSERT INTO daily_close ("day", "closed", "net_cash") 
-              VALUES ('${isoyesterDay}', 'true', ${parseFloat(netcashYesterday)});`)
+              let sql = `INSERT INTO daily_close (day, closed, net_cash) 
+              VALUES ('${isoyesterDay}', 'true', ${parseFloat(netcashYesterday)});`
+              console.log(sql);
+              await execRaw(sql);
             } catch (error) {
               console.error(error)
             }

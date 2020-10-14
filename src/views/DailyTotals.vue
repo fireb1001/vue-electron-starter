@@ -462,7 +462,7 @@ sum_rahn_increase
               <td v-if="show_totals.includes('net_income_no_diff')" >
                 <span 
                 :class="{'text-primary': ! netinc_paid_days[item.day], 'text-success': netinc_paid_days[item.day], 'font-weight-bold': netinc_paid_days[item.day]}" 
-                @click="showIncomeModal(item.net_income_no_diff, item.day)">
+                @click="netinc_paid_days[item.day]?{}:showIncomeModal(item.net_income_no_diff, item.day)">
                 {{item.net_income_no_diff | round }}
                 </span>
               </td>
@@ -605,7 +605,7 @@ sum_rahn_increase
 </template>
 <script>
 import { MainMixin } from '../mixins/MainMixin'
-import { knex, moment } from '../main'
+import { execRaw, knex, moment, selectRaw } from '../main'
 import { Settings, DateTime } from 'luxon'
 import { CashflowCtrl, CashflowDAO } from '../ctrls/CashflowCtrl'
 
@@ -671,11 +671,7 @@ export default {
           notes: 'صرف وهبة ليوم '+day
         }))
       }
-      // save daily flag
-      let [{json}] = await knex.raw(`select json from daily_close where day='${day}' `)
-      if(json) json = JSON.parse(json)
-      json = { ...json, recpgiven_out: true}
-      await knex.raw(`update daily_close set json='${JSON.stringify(json)}' where day='${day}' `)
+      await this.saveDailyClose({recpgiven_out:true},day);
       this.recpgiven_form = {day: '', amount : 0}
       await this.refresh_all()
     },
@@ -690,13 +686,21 @@ export default {
           notes: 'صرف مشال ليوم '+day
         }))
       }
-      // save daily flag
-      let [{json}] = await knex.raw(`select json from daily_close where day='${day}' `)
-      if(json) json = JSON.parse(json)
-      json = { ...json, mashal_out: true}
-      await knex.raw(`update daily_close set json='${JSON.stringify(json)}' where day='${day}' `)
+      await this.saveDailyClose({mashal_out:true},day);
       this.mashal_form = {day: '', amount : 0}
       await this.refresh_all()
+    },
+    async saveDailyClose(data, day) {
+      try {
+        await execRaw(`insert into daily_close(day,closed) values('${day}', 'true')`)
+      } catch (error) {
+        
+      }
+      // save daily flag
+      let [{json}] = await selectRaw(`select json from daily_close where day='${day}' `)
+      if(json) json = JSON.parse(json)
+      json = { ...json, ...data}
+      await execRaw(`update daily_close set json='${JSON.stringify(json)}' where day='${day}' `)
     },
     async saveNetincome(cashflow = true) {
       let {day, amount}  = this.netincom_form
@@ -710,12 +714,7 @@ export default {
           notes: 'عمولة يوم '+day
         }))
       }
-      // save daily flag
-      let [{json}] = await knex.raw(`select json from daily_close where day='${day}' `)
-      console.log(json)
-      if(json) json = JSON.parse(json)
-      json = { ...json, income_out: true}
-      await knex.raw(`update daily_close set json='${JSON.stringify(json)}' where day='${day}' `)
+      await this.saveDailyClose({income_out:true},day);
       this.netincom_form = {day: '', amount : 0}
       await this.refresh_all()
     },
@@ -727,8 +726,8 @@ export default {
     },
     async saveInitData(){
       console.log(this.init_data);
-      await knex.raw(`delete from shader_configs where config_name = 'init-totals';`);
-      await knex.raw(`INSERT into shader_configs ( "config_name", "config_value", "config_verify") 
+      await execRaw(`delete from shader_configs where config_name = 'init-totals';`);
+      await execRaw(`INSERT into shader_configs ( "config_name", "config_value", "config_verify") 
       VALUES (
        'init-totals','${JSON.stringify(this.init_data)}','${this.init_data.day}'
       )`);
@@ -755,7 +754,7 @@ export default {
     },
     async saveExpData(){
       console.log(this.init_exp_data);
-      await knex.raw(`delete from cashflow where d_product = 'init';`);
+      await execRaw(`delete from cashflow where d_product = 'init';`);
       let alldata = {...this.init_exp_data};
       let day = alldata.day;
       delete alldata.day;
@@ -766,9 +765,9 @@ export default {
     },
     async refresh_all(){
       
-      this.expenses_items = await knex.raw(`SELECT DISTINCT(notes) notes from cashflow where state = 'expenses' or state = 'act_pymnt' group by notes HAVING COUNT(*) > 1`);
-      let inits_record = await knex.raw(`SELECT * from shader_configs where config_name='init-totals'`);
-      let init_record_values = inits_record[0] ? JSON.parse(inits_record[0].config_value): null;
+      this.expenses_items = await selectRaw(`SELECT DISTINCT(notes) notes from cashflow where state = 'expenses' or state = 'act_pymnt' group by notes HAVING COUNT(*) > 1`);
+      let [inits_record] = await selectRaw(`SELECT * from shader_configs where config_name='init-totals'`);
+      let init_record_values = inits_record ? JSON.parse(inits_record.config_value): null;
       if(init_record_values && this.$store.state.day.iso >= init_record_values.day ) {
         // Set init vals
         this.past_init_vals = init_record_values;
@@ -778,15 +777,15 @@ export default {
       } else {
         this.daily_totals = await knex('v_daily_sums').orderBy('day',"asc")
       }
-      console.log(this.daily_totals)
-      let all_exp_init = await knex.raw(`select * from cashflow where state='expenses' and d_product='init'`);
+
+      let all_exp_init = await selectRaw(`select * from cashflow where state='expenses' and d_product='init'`);
       let all_exp_init_arr = {}
       all_exp_init.forEach(item => all_exp_init_arr[item.notes] = item.amount)
       this.all_fukn_expenses = all_exp_init_arr
 
-      let netinc_paid_days = await knex.raw(`select day from daily_close where json like '%"income_out":"true"%' or  json like '%"income_out":true%'`);
-      let recpgiven_days = await knex.raw(`select day from daily_close where json like '%"recpgiven_out":"true"%' or  json like '%"recpgiven_out":true%'`);
-      let mashalout_days = await knex.raw(`select day from daily_close where json like '%"mashal_out":"true"%' or  json like '%"mashal_out":true%'`);
+      let netinc_paid_days = await selectRaw(`select day from daily_close where json like '%"income_out":"true"%' or  json like '%"income_out":true%'`);
+      let recpgiven_days = await selectRaw(`select day from daily_close where json like '%"recpgiven_out":"true"%' or  json like '%"recpgiven_out":true%'`);
+      let mashalout_days = await selectRaw(`select day from daily_close where json like '%"mashal_out":"true"%' or  json like '%"mashal_out":true%'`);
       let all = {}
       let all_recpgiven = {}
       let all_mashalout = {}
@@ -824,15 +823,15 @@ export default {
       ('${this.checkedItems.join("','")}')`
       if(fromDateTime && fromDateTime.toISODate()) sql += ` and day >= '${fromDateTime.toISODate()}'`
       if(toDateTime && toDateTime.toISODate()) sql += ` and day <= '${toDateTime.toISODate()}'`
-      this.daily_expenses = await knex.raw(sql)
-      console.log(this.daily_expenses)
+      this.daily_expenses = await selectRaw(sql)
+      console.log('%c Mo2Log daily_expenses ', 'background: #bada55', this.daily_expenses);
     },
     async change_day(){
       let fromDateTime = DateTime.fromISO(this.from_day)
       let toDateTime = DateTime.fromISO(this.to_day)
 
-      let inits_record = await knex.raw(`SELECT * from shader_configs where config_name='init-totals'`);
-      let init_record_values = inits_record[0] ? JSON.parse(inits_record[0].config_value): null;
+      let [inits_record] = await selectRaw(`SELECT * from shader_configs where config_name='init-totals'`);
+      let init_record_values = inits_record ? JSON.parse(inits_record.config_value): null;
       if( init_record_values && this.from_day < init_record_values.day ) {
         this.past_init_vals = null
       }

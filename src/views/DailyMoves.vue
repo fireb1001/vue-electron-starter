@@ -139,36 +139,6 @@
       <h4>صافي الخزينة : {{ cash_sums.net | toAR(true) }}</h4>
     </div>
     <hr>
-    <div v-if="false && app_config.shader_name == 'amn1'">
-      <table class="table table-bordered mt-1 pr-hideme">
-        <tr>
-          <th> اجمالي مديونيات الفلاحين</th>
-          <td>{{capital_sums.supp_sum_debt | round | toAR}}</td>
-
-          <th> اجمالي مديونيات التجار</th>
-          <td>{{capital_sums.cust_sum_debt | round | toAR}}</td>
-
-          <th> اجمالي مديونيات التعاملات</th>
-          <td>{{capital_sums.sum_dealer_trans | round | toAR}}</td>
-
-          <th> نقدية</th>
-          <td>{{capital_sums.net_cash | round | toAR}}</td>
-        </tr>
-        <tr>
-          <th>اجمالي فواتير الرصد</th>
-          <td>({{ capital_sums.sum_net_rasd | round | toAR }})</td>
-        </tr>
-        <tr>
-          <th>اجمالي صافي الايراد </th>
-          <td>({{ capital_sums.sum_net_income_no_diff | round | toAR }})</td>
-        </tr>
-        <tr>
-          <th>{{'sum_capital' | tr_label}}</th>
-          <td>{{ capital_sums.sum_capital | round | toAR }}</td>
-        </tr>
-      </table>
-      <hr>
-    </div>
   <section class="inout-cashflow">
     <h2>
       {{'menu_collecting'| tr_label}} اليوم
@@ -196,7 +166,7 @@ import { CashflowCtrl } from '../ctrls/CashflowCtrl'
 import { ReceiptsCtrl } from '../ctrls/ReceiptsCtrl'
 import CashflowTable from '@/components/CashflowTable.vue'
 import { MainMixin } from '../mixins/MainMixin'
-import { knex } from '../main'
+import { knex, selectRaw } from '../main'
 import { CustomersCtrl } from '../ctrls/CustomersCtrl'
 import { SuppliersCtrl } from '../ctrls/SuppliersCtrl'
 
@@ -219,15 +189,6 @@ export default {
         sum_oncredit: null, // oncredit outgoings and also on credit cashflows paid , acc_rest
         sum_exp_no_deduct: null
       },
-      capital_sums: {
-        sum_capital:0, 
-        cust_sum_debt: 0,
-        supp_sum_debt: 0, 
-        net_cash: 0,
-        sum_net_rasd: 0,
-        sum_dealer_trans: 0,
-        sum_net_income_no_diff: 0
-      }
     }
   },
   methods: {
@@ -250,21 +211,12 @@ export default {
   async mounted() {
     let { sum_debt: cust_sum_debt } = await new CustomersCtrl().sumDebt()
     let {sum_debt: supp_sum_debt } = await new SuppliersCtrl().sumDebt()
-    let [ dealer_trans ]  = await knex.raw('select sum(amount) as sum_dealer_trans from dealer_trans');
-    let [ net_income_no_diff ]  = await knex.raw('select sum (net_income_no_diff) as sum_net_income_no_diff from v_daily_sums;');
+    let [dealer_trans]  = await selectRaw('select sum(amount) as sum_dealer_trans from dealer_trans');
+    let [ net_income_no_diff ]  = await selectRaw('select sum (net_income_no_diff) as sum_net_income_no_diff from v_daily_sums;');
     let sum_dealer_trans = dealer_trans && dealer_trans.sum_dealer_trans ? parseFloat(dealer_trans.sum_dealer_trans) : 0;
     let sum_net_income_no_diff = net_income_no_diff && net_income_no_diff.sum_net_income_no_diff ? parseFloat(net_income_no_diff.sum_net_income_no_diff) : 0;
     this.net_cash = await this.cashflowCtrl.getNetCash({day: this.day.iso})
     let {sum_net_rasd} = await new ReceiptsCtrl().sumNetRasd()
-    this.capital_sums = {
-      sum_capital: cust_sum_debt + supp_sum_debt + this.net_cash - sum_net_rasd + sum_dealer_trans,
-      cust_sum_debt: cust_sum_debt,
-      supp_sum_debt: supp_sum_debt,
-      net_cash: this.net_cash,
-      sum_net_rasd: sum_net_rasd,
-      sum_dealer_trans: sum_dealer_trans,
-      sum_net_income_no_diff: sum_net_income_no_diff
-    }
     this.refresh_all()
   },
   computed: {

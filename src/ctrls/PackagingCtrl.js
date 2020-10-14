@@ -1,4 +1,4 @@
-import { bookshelf, knex } from "../main";
+import { bookshelf, knex, selectRaw } from "../main";
 
 export class PackagingDAO {
   id;
@@ -54,43 +54,32 @@ export class PackagingCtrl {
   }
 
   async getPersonSum(filter= {supplier_id: 0, customer_id:0 , dealer_id: 0}){
-    let count, amount = 0 
+    let result = null 
     if(filter.supplier_id){
       let raw_sql = `select sum(count) count, sum(amount) amount from packaging 
       where supplier_id =${filter.supplier_id} and (out_scope !=1 or out_scope is null)`;
-      let [result] = await knex.raw(raw_sql);
-      count = result.count
-      amount = result.amount
+      [result] = await selectRaw(raw_sql);
     } else if(filter.customer_id){
       let raw_sql = `select sum(count) count, sum(amount) amount from packaging where customer_id =${filter.customer_id}`;
-      let [result] = await knex.raw(raw_sql);
-      count = result.count
-      amount = result.amount
+      [result] = await selectRaw(raw_sql);
     }
     else if (filter.dealer_id){
       let raw_sql = `select sum(count) count, sum(amount) amount from packaging where dealer_id =${filter.dealer_id}`;
-      let [result] = await knex.raw(raw_sql);
-      count = result.count
-      amount = result.amount
+      [result] = await selectRaw(raw_sql);
     }
+    let { count, amount } = result;
+    console.log('%c getPersonSum result ', 'background: #bada55' , result);
     return {count: +count, amount: +amount}
   }
 
-  async getInitStock(filter= {day: ''}) {
-    let result = null
-    if(filter.day) {
-      // get sum before day
-      let raw_sql = `select sum(count) count, sum(amount) amount from packaging where day < '${filter.day}'`;
-      console.log(raw_sql)
-      result = await knex.raw(raw_sql);
-    } else {
-      throw Error('day is not provided')
-    }
-    return result
+  async getInitStock(day) {
+    let raw_sql = `select sum(count) count, sum(amount) amount from packaging where day < '${day}'`;
+    let [result] = await selectRaw(raw_sql);
+    return result;
   }
 
   async getAllCounts() {
-    let [result] = await knex.raw(`select
+    let [result] = await selectRaw(`select
     sum(count_purchase) sum_purchase ,
     sum(count_destruct) sum_destruct ,
     sum(count_suppliers) sum_suppliers ,
@@ -104,7 +93,7 @@ export class PackagingCtrl {
       case when customer_id IS NOT NULL then count END count_customers,
       case when dealer_id IS NOT NULL then count END count_dealers
     from packaging
-    )`);
+    ) packaging_totals`);
     return result;
   }
 

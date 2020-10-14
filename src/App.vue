@@ -2,6 +2,12 @@
   <div id="app">
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow d-print-none">
       <b class="navbar-brand col-sm-3 col-md-2 mr-0">برنامج الوكالة</b>
+      <b-nav-item-dropdown  text="اعدادات" class="top-nav">
+        <b-dropdown-item href="#" class="top-nav-item">EN</b-dropdown-item>
+        <b-dropdown-item href="#" class="top-nav-item">ES</b-dropdown-item>
+        <b-dropdown-item href="#" class="top-nav-item">RU</b-dropdown-item>
+        <b-dropdown-item href="#" class="top-nav-item">FA</b-dropdown-item>
+      </b-nav-item-dropdown>
     </nav>
     <div class="container-fluid">
       <div class="row" style="max-width: 100%;">
@@ -103,13 +109,6 @@
                 <router-link class="nav-link active" to="/customers">
                   <span class="fa fa-handshake"></span>
                   {{ custom_labels['manage_customers'] }}
-                </router-link>
-              </li>
-
-              <li class="nav-item">
-                <router-link class="nav-link active" to="/cust_mysql">
-                  <span class="fa fa-handshake"></span>
-                  Mysql Customers
                 </router-link>
               </li>
 
@@ -224,7 +223,7 @@ import { Settings, DateTime } from "luxon";
 import { ShaderConfigsCtrl } from "./ctrls/ShaderConfigsCtrl";
 import { ProductsCtrl } from "./ctrls/ProductsCtrl";
 import { TransTypesCtrl } from "./ctrls/TransTypesCtrl";
-import { MyStoreMutations, knex } from "./main.js";
+import { MyStoreMutations, knex, selectRaw } from "./main.js";
 import { UsersCtrl } from "./ctrls/UsersCtrl";
 import { MainMixin } from "./mixins/MainMixin";
 
@@ -246,7 +245,8 @@ export default {
   methods: {
     async loginSubmit(evt) {
       evt.preventDefault();
-      //console.log(this.user)
+      
+      
       let logged_in = await this.usersCtrl.login(this.user);
       if (logged_in) {
         // Store logged in user
@@ -266,14 +266,16 @@ export default {
     this.$store.commit(MyStoreMutations.setTranstypesArr, transNames);
   },
   async beforeMount() {
-
     let custom_labels = null;
     try {
-      await knex.raw("PRAGMA integrity_check;");
-      let [fk] = await knex.raw("PRAGMA foreign_keys = true ;");
+      /*
+      await knexraw("PRAGMA integrity_check;");
+      let [fk] = await knexraw("PRAGMA foreign_keys = true ;");
       console.log(fk)
-      let [tables] = await knex.raw("SELECT name FROM sqlite_master WHERE type = 'table';");
+      
+      let [tables] = await knexraw("SELECT name FROM sqlite_master WHERE type = 'table';");
       if(! tables) throw "Empty DB - No Tables"
+      */
     } catch (error) {
       console.error(error);
       window.alert("لم يتم ربط قاعدة البيانات");
@@ -281,8 +283,7 @@ export default {
       return;
     }
 
-    let shader_results = await knex.raw(`select config_value as shader_name from shader_configs where config_name = 'shader_name'`)
-    console.log(shader_results);
+    let shader_results = await selectRaw(`select config_value as shader_name from shader_configs where config_name = 'shader_name'`)
     if(! shader_results[0] || ! shader_results[0].shader_name) {
       console.error('shader_name Not Set');
       window.alert('shader_name Not Set');
@@ -298,14 +299,14 @@ export default {
 
     let shader_conf = await this.shaderConfigsCtrl.getAppCongifs();
     this.$store.commit(MyStoreMutations.setShaderConfigs, shader_conf);
-  
     let till_val = + shader_conf['till_val'];
     if(! till_val ) {
-      window.alert("!");
+      window.alert("!*");
       return 
     } else {
       // verify till_val
-      let [verify] = await knex.raw(`select config_verify as verify from shader_configs where config_name = 'till_val'`)
+      let [verify]= await selectRaw(`select config_verify as verify from shader_configs where config_name = 'till_val'`);
+
       console.log(verify['verify'],shader_conf['shader_name'], verify['verify'], undefined);
       let should_be = till_val + + shader_conf['shader_name'].split('').map(x => ! isNaN(x) ? + x: x.charCodeAt(0)).reduce((a,b) => a+b);
       console.log(verify['verify'], "should_be00-" + should_be)
@@ -315,7 +316,7 @@ export default {
       }
     }
 
-    this.require_login = shader_conf["require_login"]
+    this.require_login = shader_conf["require_login"] && process.env.NODE_ENV != 'development'
       ? shader_conf["require_login"]
       : false;
     
@@ -337,10 +338,10 @@ export default {
           .format("YYYY-MM-DD")
       );
     }
-
+    // go back to arabic
     moment.locale("ar");
     let iso =  dateTime.toISODate()
-    let [stricted] = await knex.raw(`select closed from daily_close where day = '${iso}'`);
+    let [stricted] = await selectRaw(`select closed from daily_close where day = '${iso}'`);
     const day = {
       ts: dateTime.valueOf(),
       iso: dateTime.toISODate(),
@@ -352,12 +353,13 @@ export default {
     this.$store.commit("setDay", day);
 
     // get all stricted days
-    let all = await knex.raw(`select day,closed from daily_close`);
-    let assos = all.reduce((a,b)=>{
+    let all = await selectRaw(`select day,closed from daily_close`);
+    console.log("all closed days",all)
+    let closed_days = all.reduce((a,b)=>{
       a[b.day]= b.closed == 'true'
       return a;
-    },{})
-    this.$store.commit('setClosedDays' , assos )
+    },{});
+    this.$store.commit('setClosedDays' , closed_days )
   }
 };
 </script>

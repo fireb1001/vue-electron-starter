@@ -1,4 +1,4 @@
-import { bookshelf, knex } from "../main";
+import { bookshelf, execRaw, knex, selectRaw } from "../main";
 import { SuppliersCtrl, SupplierTransDAO } from "./SuppliersCtrl";
 
 export class ReceiptDAO {
@@ -134,14 +134,14 @@ export class ReceiptsCtrl {
   }
 
   async sumNetRasd(){
-    let result = await knex.raw(`select sum(net_value) sum_net_rasd from receipts where recp_paid=1`)
-    return result.length > 0 ? result[0] : null
+    let [result] = await selectRaw(`select sum(net_value) sum_net_rasd from receipts where recp_paid=1`)
+    return result;
   }
 
   /**@returns {Array} */
   async findDailyReceipts(filter = { day: null }) {
     // return await knex("v_recp_sums").where("day", filter.day);
-    return await knex.raw(`
+    let results = await selectRaw(`
 SELECT 
 day,
 recp_gsums.supplier_id as supplier_id,
@@ -194,6 +194,8 @@ FROM
     suppliers on recp_gsums.supplier_id = suppliers.id
 Where day = '${filter.day}'
     `);
+
+    return results;
   }
 
   async deleteById(id) {
@@ -203,7 +205,7 @@ Where day = '${filter.day}'
     if (instance) {
       await instance.details().invokeThen("destroy");
       // TODO from suppliers Ctrl
-      await knex.raw("delete from supplier_trans where receipt_id = " + id);
+      await execRaw("delete from supplier_trans where receipt_id = " + id);
       return await instance.destroy();
     } else return null;
 
@@ -215,7 +217,7 @@ Where day = '${filter.day}'
     console.log(instance, instance.details())
     return await instance.related('details').invokeThen('destroy')
     */
-    await knex.raw("delete from receipt_details where receipt_id = " + id);
+    await execRaw("delete from receipt_details where receipt_id = " + id);
     /* */
   }
 }

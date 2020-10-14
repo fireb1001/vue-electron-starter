@@ -67,7 +67,7 @@
 </template>
 <script>
 import { MainMixin } from '../mixins/MainMixin'
-import { knex } from '../main'
+import { knex, selectRaw } from '../main'
 import { Settings, DateTime } from 'luxon'
 import { CashflowCtrl } from '../ctrls/CashflowCtrl'
 
@@ -107,8 +107,8 @@ export default {
         ${toDateTime ? "and day <= '"+ toDateTime.toISODate()+"'" : ""}
         GROUP by day, state 
       `
-      let daily_ex = await knex.raw(query);
       console.log(query);
+      let daily_ex = await selectRaw(query);
       daily_ex.map( item => {
         daily_ex_by_day[item.day] = { ...daily_ex_by_day[item.day],day: item.day, [item.state]: item.sum}
       });

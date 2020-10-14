@@ -25,7 +25,7 @@
       <b class="text-danger float-left " @click="discard_success = null">اغلاق x</b>
   </b-alert> 
 
-  <h2>وارد اليوم {{day.arab}}</h2>
+  <h2>وارد يوم {{day.arab}}</h2>
       <div class="table-responsive">
         <table class="table table-striped table-sm">
           <thead>
@@ -161,6 +161,7 @@ export default {
     }
   },
   async mounted() {
+    let init_time = new Date().getTime()
     const moment = require('moment');
 
     this.cashflow_rasid = await this.cashflowCtrl.findAll({day: this.day.iso,state: 'inc_collect', notes: 'عهده'})
@@ -170,6 +171,7 @@ export default {
     this.net_cash_yesterday = await this.cashflowCtrl.getNetCash({day: isoyesterDay})
     console.log(this.net_cash_yesterday)
     this.refresh_all()
+    console.log('⌚ Time to refresh_all in ms = ' , new Date().getTime() - init_time)
   },
   computed: {
     inc_sums: function() {

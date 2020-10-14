@@ -17,7 +17,8 @@
         <tr>
           <th>ملاحظات</th>
           <td>{{supplier.notes}}</td>
-
+          <th>#</th>
+          <td>{{supplier.id}}</td>
         </tr>
       </table>
     </section>

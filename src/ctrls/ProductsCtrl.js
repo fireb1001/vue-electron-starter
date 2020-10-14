@@ -1,4 +1,4 @@
-import { bookshelf, knex } from '../main'
+import { bookshelf, execRaw, knex } from '../main'
 
 export class ProductDAO {
     id
@@ -66,7 +66,7 @@ export class ProductsCtrl {
   }
 
   async permenentDeleteById(id) {
-    await knex.raw(`delete from products where id = ${id}`);
+    await execRaw(`delete from products where id = ${id}`);
   }
 
 

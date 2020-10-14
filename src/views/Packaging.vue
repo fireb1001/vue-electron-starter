@@ -10,8 +10,6 @@
         <tr>
           <th>عدايات فلاحين</th>
           <td>{{pkg_totals.sum_suppliers | toAR}}</td>
-
-          <th> </th>
           
           <th> مبلغ اجمالي صافي الرهونات للتجار</th>
           <td>{{sum_net_rahn | toAR}}</td>
@@ -262,7 +260,7 @@ export default {
     async refresh_all(){
       // Get sum before today
       this.pkg_trans = []
-      let [init_stock] = await new PackagingCtrl().getInitStock({day: this.day.iso});
+      let init_stock = await new PackagingCtrl().getInitStock(this.day.iso);
       this.pkg_trans.push(new PackagingDAO({count: init_stock.count,amount: init_stock.amount, notes: 'رصيد'}))
       let today_trans = await new PackagingCtrl().findAll({day: this.day.iso}, 'id');
       this.pkg_trans.push(...today_trans);
@@ -275,6 +273,7 @@ export default {
       +this.pkg_totals.sum_dealers ;
 
       this.sum_net_rahn = await new CustomersCtrl().getSumNetRahn();
+      console.log(this.sum_net_rahn)
     }
   },
   async mounted() {

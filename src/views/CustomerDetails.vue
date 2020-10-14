@@ -549,7 +549,7 @@ import { CustomersCtrl, CustomerTransDAO } from '../ctrls/CustomersCtrl'
 import { TransTypesCtrl } from '../ctrls/TransTypesCtrl'
 import { CashflowDAO, CashflowCtrl } from '../ctrls/CashflowCtrl'
 import { MainMixin } from '../mixins/MainMixin';
-import { knex } from '../main';
+import { execRaw, knex } from '../main';
 import AlertDay from '@/components/AlertDay.vue'
 import { PackagingCtrl, PackagingDAO } from '../ctrls/PackagingCtrl';
 // import image from '../assets/vegetables.png'
@@ -702,7 +702,7 @@ export default {
       }
     },
     async print_done(outg_day){
-      await knex.raw(`insert into customers_daily (customer_id, day, printed) values( ${this.customer_id} , '${outg_day}', 1)`)
+      await execRaw(`insert into customers_daily (customer_id, day, printed) values( ${this.customer_id} , '${outg_day}', 1)`)
     },
     async sellRest(evt) {
       evt.preventDefault()

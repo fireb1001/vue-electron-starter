@@ -799,7 +799,7 @@ import { SupplierDAO, SuppliersCtrl } from '../ctrls/SuppliersCtrl'
 import draggable  from 'vuedraggable'
 import { MainMixin } from '../mixins/MainMixin'
 import { TransTypesCtrl } from '../ctrls/TransTypesCtrl'
-import {knex} from '../main'
+import {knex, selectRaw} from '../main'
 import AlertDay from '@/components/AlertDay.vue'
 
 const { ipcRenderer } = require('electron')
@@ -840,11 +840,11 @@ export default {
   mixins: [MainMixin],
   methods: {
     async refresh_all(){
-      let calc_balance_was = await knex.raw(`select sum(amount) as balance_was from supplier_trans where supplier_id = ${this.supplier_id} and day < '${this.recp_day}'`);
-      if(calc_balance_was && calc_balance_was[0] && calc_balance_was[0].balance_was){
-        this.day_balance_was = parseFloat(calc_balance_was[0].balance_was)
+      let [calc_balance_was]= await selectRaw(`select sum(amount) as balance_was from supplier_trans where supplier_id = ${this.supplier_id} and day < '${this.recp_day}'`);
+      if( calc_balance_was && calc_balance_was.balance_was){
+        this.day_balance_was = parseFloat(calc_balance_was.balance_was)
       }
-      let [calc_debt] = await knex.raw(`select sum(amount) as curr_debt from supplier_trans where supplier_id = ${this.supplier_id}`);
+      let [calc_debt] = await selectRaw(`select sum(amount) as curr_debt from supplier_trans where supplier_id = ${this.supplier_id}`);
 
       this.curr_debt = parseFloat(calc_debt.curr_debt)
       
@@ -908,15 +908,7 @@ export default {
         await this.cashflowCtrl.rawDelete({receipt_id: this.recp_3.id})
       }
         
-      // TODO delete also تاريخ الصرف
-      // ياخي قحا
-      /*
-      await this.cashflowCtrl.rawDelete({
-        day: this.recp_day,
-        supplier_id: this.supplier_id,
-        state: 'recp_paid'
-      })
-      */
+
       await this.refresh_all()
     },
     async setRecpPaid( receipt, recp_paid ) {
@@ -1109,7 +1101,7 @@ export default {
   async mounted(){
     //console.log('shader_configs', this.$store.state.shader_configs)
     
-    ipcRenderer.on('shortcut_pressed',(event, message)=>{
+    ipcRenderer.on('shortcut-pressed',(event, message)=>{
       console.log(message)
     })
     this.supplier = await new SuppliersCtrl().findById(this.supplier_id)
@@ -1137,6 +1129,7 @@ export default {
       this.inc_headers.forEach(one => {
         total_diff += one.diff
       });
+      console.log('%c Mo2Log total_diff ', 'background: #bada55', total_diff );
       return total_diff;
     }
   },

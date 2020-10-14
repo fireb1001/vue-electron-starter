@@ -1,4 +1,4 @@
-import { bookshelf, knex } from "../main";
+import { bookshelf, execRaw, knex, selectRaw } from "../main";
 
 export class CashflowDAO {
   id;
@@ -96,15 +96,13 @@ export class CashflowCtrl {
   }
 
   async getExItems() {
-    let results = await knex.raw(
+    return await selectRaw(
       `select * from trans_types where category = 'cashflow' and sum = '-' and map_cashflow= 'ex'`
     );
-
-    return results;
   }
 
   async getNetCash(filter = { day: "" }) {
-    let results = await knex.raw(
+    let results = await selectRaw(
       `SELECT sum(CASE When sum='-' Then -amount Else amount End ) net_amount from cashflow where day= '${filter.day}'`
     );
     let net_amount = results && results.length > 0 ? results[0].net_amount : 0;
@@ -114,42 +112,39 @@ export class CashflowCtrl {
   async getSupplierNolons(filter = { day: "", supplier_id: 0 }) {
     let query = `SELECT supplier_id, day, sum(amount) as total_nolon from cashflow WHERE 
     state= 'nolon' and supplier_id = '${filter.supplier_id}' and day = '${filter.day}'`;
-    let results = await knex.raw(query);
-    let total_nolon =
-      results && results.length > 0 ? results[0].total_nolon : 0;
-    return total_nolon;
+    let [results] = await selectRaw(query);
+    return results.total_nolon ? results.total_nolon  : 0;
   }
 
   async getSupplierRecpExpenses(filter = { day: "", supplier_id: 0 }) {
     let query = `SELECT id,supplier_id, day, amount from cashflow WHERE 
     state= 'supp_recp_expenses' and supplier_id = '${filter.supplier_id}' and income_day = '${filter.day}'`;
-    let results = await knex.raw(query);
-    console.log("RES", query)
-    let recp_expenses =
-      results && results.length > 0 ? new CashflowDAO(results[0]) : null;
-    return recp_expenses;
+    console.log("getSupplierRecpExpenses query", query)
+    let [result] = await selectRaw(query);
+    console.log(result)
+    return result ? new CashflowDAO(result) : null;
   }
   // async removeByOutgoingId(outgoing_id) { }
   async rawDelete(filter = {}) {
     //console.log('rawDelete filter', filter)
     if (filter.incoming_id)
-      await knex.raw(
+      await execRaw(
         `delete from cashflow where incoming_id = ${filter.incoming_id}`
       );
     else if (filter.outgoing_id)
-      await knex.raw(
+      await execRaw(
         `delete from cashflow where outgoing_id = ${filter.outgoing_id}`
       );
     else if (filter.state == "recp_paid" && filter.supplier_id && filter.day)
-      await knex.raw(
+      await execRaw(
         `delete from cashflow where state= 'recp_paid' and day='${filter.day}' and supplier_id= ${filter.supplier_id}`
       );
     else if (filter.receipt_id)
-      await knex.raw(
+      await execRaw(
         `delete from cashflow where receipt_id= ${filter.receipt_id}`
       );
     else if (filter.cashflow_id)
-      await knex.raw(`delete from cashflow where id= ${filter.cashflow_id}`);
+      await execRaw(`delete from cashflow where id= ${filter.cashflow_id}`);
   }
   async deleteById(id) {
     let instance = await this.model.where("id", id).fetch();

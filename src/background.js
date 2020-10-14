@@ -4,12 +4,13 @@ import { app, protocol, BrowserWindow, globalShortcut } from 'electron'
 import * as path from 'path'
 import { sync_exec } from'./tools'
 import { format as formatUrl } from 'url'
-import {
-  createProtocol,
-  //installVueDevtools
-} from 'vue-cli-plugin-electron-builder/lib'
+import {  createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+process.once('loaded', _ => console.log('process loaded'));
+process.on('exit', _ => console.log('process exit'));
+
+const moment = require('moment');
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow
 
@@ -27,6 +28,7 @@ function createMainWindow () {
   } else {
     createProtocol('app')
     //   Load the index.html when not in development
+    /*
     window.loadURL(
       formatUrl({
         pathname: path.join(__dirname, 'index.html'),
@@ -34,6 +36,8 @@ function createMainWindow () {
         slashes: true
       })
     )
+    */
+    window.loadURL("app://./index.html");
   }
 
   window.on('closed', async () => {
@@ -54,9 +58,25 @@ function createMainWindow () {
 }
 
 // quit application when all windows are closed
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async() => {
   // on macOS it is common for applications to stay open until the user explicitly quits
   if (process.platform !== 'darwin') {
+    console.log('electron will quit')
+    // just move bk logic to here 
+    moment.locale('en')
+    let isoDay = moment().format('YYYY-MM-DD')
+    const bk_dir = 'D:\\00_db';
+
+    // Create directory if not exists
+    const fs = require('fs');
+    if (!fs.existsSync(bk_dir)){
+      await fs.mkdirSync(bk_dir);
+    }
+
+    const dbFile = path.resolve(app.getPath('userData'), 'db/shaderlite.db')
+    // TODO get dirs programaticly and do in one place
+    await sync_exec(`D:\\bin\\mysqldump -u root shaderdb > ${bk_dir}\\shaderbk.sql `)
+    await sync_exec(`copy ${dbFile} ${bk_dir}\\shaderlite-${isoDay}.db`)
     app.quit()
   }
 })
@@ -70,27 +90,23 @@ app.on('activate', () => {
 
 // create main BrowserWindow when electron is ready
 app.on('ready', async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    //await installVueDevtools()
-  }
   mainWindow = createMainWindow()
-  mainWindow.on('close', async (e)=> {
-    //await sync_exec(`copy C:\\Users\\alrhma\\AppData\\Roaming\\shaderlite\\db\\shaderlite.db D:\\zdevhome\\electron\\shaderlite\\db\\shaderlite.db`)
-    let moment = require('moment')
-    moment.locale('en')
-    let isoDay = moment().format('YYYY-MM-DD')
-    const path = require('path')
-    const dbFile = path.resolve(app.getPath('userData'), 'db/shaderlite.db')
-    // TODO get dirs programaticly and do in one place
-    let sout = await sync_exec(`copy ${dbFile} D:\\00_db\\shaderlite-${isoDay}.db`)
-    console.log(sout.stdout ,dbFile, e)
-  })
-})
-
-app.on('ready', () => {
   globalShortcut.register('CmdOrCtrl+1', () => {
     console.log('CmdOrCtrl+1 is pressed')
-    mainWindow.webContents.send('shortcut_pressed','CmdOrCtrl+1')
+    mainWindow.webContents.send('shortcut-pressed','CmdOrCtrl+1')
   })
+  /*
+  globalShortcut.register("CmdOrCtrl+R", () => {
+    console.log("CommandOrControl+R is pressed: Shortcut Disabled");
+
+    // mainWindow.webContents.send('close-connection');
+    // app.relaunch();
+    // app.exit(0);
+
+    // Force app to crash
+    process.crash();
+  });
+  */
+
+  // mainWindow.on('close', async (e)=> {})
 })

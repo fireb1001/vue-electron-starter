@@ -1,4 +1,4 @@
-import { bookshelf, knex } from '../main'
+import { bookshelf, execRaw, knex, selectRaw } from '../main'
 import { store } from '../store'
 import { TransTypesCtrl } from './TransTypesCtrl'
 import { CashflowCtrl } from './CashflowCtrl'
@@ -124,7 +124,7 @@ export class DealersCtrl {
 
   async findAll(filter = { limit: null }, options= {softDelete: false, orderByBalance: false}) {
 
-    let results = await knex.raw(`
+    let results = await selectRaw(`
     select * from (select * from dealers ${options.softDelete ? 'where deleted_at is null': ''}) dealers_g
     LEFT JOIN ( select dealer_id, sum(amount) as sum_debt from dealer_trans group by dealer_id ) dealer_trans_g
     ON dealers_g.id = dealer_trans_g.dealer_id ${options.orderByBalance ? 'order by balance desc' : ''}
@@ -145,8 +145,8 @@ export class DealersCtrl {
   }
 
   async sumDebt(){
-    let result = await knex.raw(`select sum(balance) as sum_debt from dealers where deleted_at is null`)
-    return result.length > 0 ? result[0] : null
+    let [result] = await selectRaw(`select sum(balance) as sum_debt from dealers where deleted_at is null`)
+    return result;
   }
 
   async getDealerDetails(id){
@@ -189,8 +189,8 @@ export class DealersCtrl {
   }
 
   async permenentDeleteById(id) {
-    await knex.raw(`delete from dealer_trans where dealer_id = ${id}`);
-    await knex.raw(`delete from dealers where id = ${id}`)
+    await execRaw(`delete from dealer_trans where dealer_id = ${id}`);
+    await execRaw(`delete from dealers where id = ${id}`)
   }
 
   async resotreById(id) {

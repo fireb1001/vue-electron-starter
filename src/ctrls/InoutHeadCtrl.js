@@ -1,4 +1,4 @@
-import {knex} from '../main'
+import {knex, selectRaw} from '../main'
 
 export class InoutHeadCtrl {
 
@@ -38,7 +38,8 @@ export class InoutHeadCtrl {
     where recp_paid = 0
 `
     console.log(query)
-    return await knex.raw(query)
+    let result = await selectRaw(query);
+    return result;
   }
 
   async findDailySuppliers(filter = { day: ''}) {
@@ -71,7 +72,8 @@ export class InoutHeadCtrl {
   )
 `
     console.log(query)
-    return await knex.raw(query)
+    let result = await selectRaw(query);
+    return result;
   }
 
 }
