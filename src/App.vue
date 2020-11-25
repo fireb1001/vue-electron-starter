@@ -106,13 +106,14 @@
                 </router-link>
               </li>
 
+              <!--
               <li class="nav-item">
                 <router-link class="nav-link active" to="/cust_mysql">
                   <span class="fa fa-handshake"></span>
                   Mysql Customers
                 </router-link>
               </li>
-
+  -->
               <li class="nav-item">
                 <router-link class="nav-link active" to="/products">
                   <span class="fa fa-apple-alt"></span>
@@ -164,7 +165,7 @@
               </li>
 
               <li class="nav-item" 
-              v-if="app_config.shader_name != 'magdy' && logged_in_user.user_type != 'editor'">
+              v-if=" logged_in_user.user_type != 'editor'">
                 <router-link class="nav-link active" to="/daily_expenses">
                   <span class="fa fa-calendar-alt"></span>
                   مجمع المصروفات 

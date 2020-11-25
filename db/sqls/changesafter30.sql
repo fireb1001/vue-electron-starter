@@ -1,6 +1,6 @@
 -- https://drive.google.com/file/d/1fcfQOvo-kKO0PPBlR5lgv0FAi27lSEWO/view?usp=sharing
 
-update "shader_configs" set config_value='1.61' where config_name = 'MANUAL_UPGRADED_TO';
+
 
 -- 1.61
 -- for amn1
@@ -35,15 +35,7 @@ VALUES ('anti_pkg_destruct', 'تعويض اهلاك عدايات', 'default', '+
 -- 1.56
 
 ---
--- for amn1
-update shader_configs set config_value = '1614970718' where config_name = 'till_val';
-update shader_configs set config_verify = '1614971035' where config_name = 'till_val';
 
-alter TABLE incomings add COLUMN pkg_dismiss INTEGER;
-alter TABLE trans_types add COLUMN cust_form INTEGER;
-alter TABLE trans_types add COLUMN map_packaging TEXT;
-
-update trans_types set cust_form = 1 where flags = 'CUST_FORM';
 
 INSERT INTO shader_configs ("config_name", "config_value", "config_verify", "shader_name", "category") 
 VALUES ('pkg_price', '10', '', 'amn1', 'config');
@@ -59,9 +51,16 @@ CREATE TABLE "packaging" (
 	"supplier_id"	INTEGER,
 	"customer_id"	INTEGER,
 	"dealer_id"	INTEGER
-)
+);
 
 -- DELETE cols from trans_types
+
+alter TABLE incomings add COLUMN pkg_dismiss INTEGER;
+alter TABLE trans_types add COLUMN cust_form INTEGER;
+alter TABLE trans_types add COLUMN map_packaging TEXT;
+
+update trans_types set cust_form = 1 where flags = 'CUST_FORM';
+
 PRAGMA foreign_keys = 0;
 
 CREATE TABLE sqlitestudio_temp_table AS SELECT *
@@ -116,12 +115,6 @@ PRAGMA foreign_keys = 1;
 
 -- 1.55
 
--- Nada
-INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
-VALUES ('till_val', '1614970718', '1902769658', 'amn1', 'config');
-
-INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
-VALUES ('till_hide', 'true', '', 'nada', 'config');
 
 INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category") 
 VALUES ('anti_cust_discount', 'تعويض خصم التاجر', 'default', '+', '', 'cashflow');
@@ -135,12 +128,6 @@ ALTER TABLE suppliers add side_acc REAL;
 -- validate till_val using 
 -- "mmn1".split('').map(x => ! isNaN(x) ? + x: x.charCodeAt(0)).reduce((a,b) => a+b);
 
--- for amn1
-INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
-VALUES ('till_val', '1591446827', '1591447144', 'amn1', 'config');
-
-INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
-VALUES ('till_hide', 'true', '', 'amn1', 'config');
 
 -- 1.45 
 -- ## update views
@@ -149,15 +136,6 @@ VALUES ('till_hide', 'true', '', 'amn1', 'config');
 delete from customer_trans where customer_id not in (select id from customers);
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
 VALUES ('kashf_header', 'kashf_mmn1.png', '', 'mmn1', 'config');
-
--- 1.44
--- F_STRICT_MODE
-
-INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
-VALUES ('demo_hide', 'true', '', 'mmn1', 'config');
-
-INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
-VALUES ('MANUAL_UPGRADED_TO', '1.44', '', 'default', 'config');
 
 
 -- 1.43
@@ -348,11 +326,11 @@ notes TEXT, FOREIGN KEY (dealer_id) REFERENCES dealers (id));
 
 -- version 1.40
 ALTER TABLE products add cust_mashal REAL;
+ALTER TABLE suppliers add box_count INTEGER;
 
 -- version 1.38
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
 VALUES ('init_mashal', '.35', '', 'amn1', 'config');
-ALTER TABLE suppliers add box_count INTEGER;
 
 
 -- version 1.35 
@@ -372,10 +350,8 @@ VALUES ('F_AARBON_KASHF', 'true', '', 'mmn1', 'config');
 INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
 VALUES ('F_SHOW_DEBT_KASHF', 'true', '', 'mmn1', 'config');
 
-INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
-VALUES ('shader_name', 'nada', '', 'default', 'config');
 
--- version 1.33 -- 
+-- version 1.33 -- DONE !
 ALTER TABLE receipts add cashflow_id INTEGER;
 ALTER TABLE cashflow add income_day TEXT;
 update cashflow set income_day = day where state = 'supp_recp_expenses';
@@ -404,6 +380,12 @@ VALUES ('ex_comm', 'عمولة + بياعة', 'default', '-', '', 'cashflow');
 INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_mashal', 'اجمالي المشال', 'default', '-', '', 'cashflow');
 
+
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
+VALUES ('init_recp_given', '1', '', 'mmn1', 'config');
+
+
+--- // Only for momen 
 INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_momen', 'حساب شركاء - معلم مؤمن', 'default', '-', '', 'cashflow');
 
@@ -416,7 +398,17 @@ VALUES ('ex_mohamed', 'مصروف كاتب استاذ محمد', 'default', '-',
 INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category")
 VALUES ('ex_hisham', 'مصروف كاتب استاذ هشام', 'default', '-', '1', 'cashflow');
 
-INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category") 
-VALUES ('init_recp_given', '1', '', 'mmn1', 'config');
 
+-- for mgdy FIRST
 
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+VALUES ('till_val', '1641037191', '1641037721', 'magdy', 'config');
+
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+VALUES ('till_hide', 'true', '', 'magdy', 'config');
+
+INSERT INTO "shader_configs" ("config_name", "config_value", "config_verify", "shader_name", "category")
+VALUES ('MANUAL_UPGRADED_TO', '1.44', '', 'default', 'config');
+
+update shader_configs set config_value = '1641037191' where config_name = 'till_val';
+update "shader_configs" set config_value='1.61' where config_name = 'MANUAL_UPGRADED_TO';
