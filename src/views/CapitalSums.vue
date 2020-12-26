@@ -1,7 +1,7 @@
 <template>
 <section class="m-3">
 
-      <div v-if="true || app_config.shader_name == 'amn1'">
+      <div >
 
         <table class="table table-bordered mt-1 ">
         <tr>

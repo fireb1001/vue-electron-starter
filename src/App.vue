@@ -133,8 +133,7 @@
                 </router-link>
               </li>
 
-              <li class="nav-item" 
-              v-if=" app_config.shader_name == 'amn1' ">
+              <li class="nav-item" >
                 <router-link class="nav-link active" to="/mng_packaging">
                   <span class="fa fa-box"></span>
                   ادارة المخزن
@@ -149,7 +148,7 @@
               </li>
 
               <li class="nav-item" 
-              v-if="app_config.shader_name == 'amn1' && logged_in_user.user_type != 'editor'">
+              v-if="logged_in_user.user_type != 'editor'">
                 <router-link class="nav-link active" to="/daily_revenue">
                   <span class="fa fa-calendar-alt"></span>
                   مجمع الارباح
@@ -157,7 +156,7 @@
               </li>
 
               <li class="nav-item" 
-              v-if=" app_config.shader_name == 'amn1' && logged_in_user.user_type != 'editor'">
+              v-if=" logged_in_user.user_type != 'editor'">
                 <router-link class="nav-link active" to="/daily_rahn">
                   <span class="fa fa-box"></span>
                   مجمع الرهونات

@@ -65,14 +65,14 @@
         </div>
       </div>
 
-      <div class="form-group row" v-if="app_config.shader_name != 'amn1'">
+      <div class="form-group row" >
         <label  class="col-sm-2">العنوان </label>
         <div class="col-sm-10">
           <input v-model="supplier_form.address" class="form-control"  placeholder="ادخل عنوان العميل" >
         </div>
       </div>
 
-      <div class="form-group row" v-if="app_config.shader_name == 'amn1'">
+      <div class="form-group row" >
         <label  class="col-sm-2">نسبة العمولة </label>
         <div class="col-sm-10">
           <input v-model="supplier_form.comm_rate" class="form-control"  placeholder="ادخل نسبة عمولة العميل" >
@@ -143,8 +143,8 @@
               <th v-if="flags.detailed ">كراسة</th>
               <th>رصيد</th>
               
-              <th v-if="app_config.shader_name != 'amn1'">{{'sum_rasd' | tr_label}}</th>
-              <th v-if="app_config.shader_name == 'amn1'">{{'عدد العدايات' | tr_label}}</th>
+              <th >{{'sum_rasd' | tr_label}}</th>
+              <th >{{'عدد العدايات' | tr_label}}</th>
               <td></td>
             </tr>
           </thead>
@@ -160,8 +160,8 @@
               <td >{{item.notes}}</td>
               <td v-if="flags.detailed ">{{item.side_acc}}</td>
               <td>{{item.sum_debt | round | toAR}}</td>
-              <td v-if="app_config.shader_name != 'amn1'">{{ item.sum_net_rasd | round | toAR}}</td>
-              <td v-if="app_config.shader_name == 'amn1'">{{ item.pkg_count }}</td>
+              <td >{{ item.sum_net_rasd | round | toAR}}</td>
+              <td >{{ item.pkg_count }}</td>
               <td class="d-print-none">
                 <button class="btn text-danger" @click="archive(item.id)"  v-if="flags.detailed && ! item.deleted_at">
                   <span class="fa fa-archive "></span> 
@@ -241,9 +241,8 @@ export default {
     },
     async saveSupplier(evt) {
       evt.preventDefault()
-      if(this.app_config.shader_name == 'amn1') {
         this.supplier_form.address = JSON.stringify({comm_rate:this.supplier_form.comm_rate})
-      }
+
       try {
         delete this.supplier_form.comm_rate
         await this.suppliersCtrl.save(this.supplier_form)
@@ -265,7 +264,7 @@ export default {
         return element.id == id
       })
       this.supplier_form = new SupplierDAO(filtered_arr[0])
-      if(this.app_config.shader_name == 'amn1' && this.supplier_form.address) {
+      if( this.supplier_form.address) {
         this.supplier_form.comm_rate = JSON.parse(this.supplier_form.address).comm_rate
       }
       // Show form only if collabsed

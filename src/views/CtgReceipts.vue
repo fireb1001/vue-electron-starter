@@ -12,7 +12,7 @@
     <AlertDay />
     <h1>فواتير الرصد للعملاء</h1>
 
-  <template v-if="app_config.shader_name =='amn1'">
+  <template >
     <div class="row" 
     v-for="(row, idx) in fltrd_rasd_recps_arr" :key="idx">
 
@@ -36,7 +36,7 @@
     </div>
     </template>
 
-    <table class="table table-striped table-sm pr-me-l" v-else>
+    <table class="table table-striped table-sm pr-me-l" >
       <thead>
         <tr>
           <th>اسم العميل</th>

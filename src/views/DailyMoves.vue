@@ -139,36 +139,7 @@
       <h4>صافي الخزينة : {{ cash_sums.net | toAR(true) }}</h4>
     </div>
     <hr>
-    <div v-if="false && app_config.shader_name == 'amn1'">
-      <table class="table table-bordered mt-1 pr-hideme">
-        <tr>
-          <th> اجمالي مديونيات الفلاحين</th>
-          <td>{{capital_sums.supp_sum_debt | round | toAR}}</td>
 
-          <th> اجمالي مديونيات التجار</th>
-          <td>{{capital_sums.cust_sum_debt | round | toAR}}</td>
-
-          <th> اجمالي مديونيات التعاملات</th>
-          <td>{{capital_sums.sum_dealer_trans | round | toAR}}</td>
-
-          <th> نقدية</th>
-          <td>{{capital_sums.net_cash | round | toAR}}</td>
-        </tr>
-        <tr>
-          <th>اجمالي فواتير الرصد</th>
-          <td>({{ capital_sums.sum_net_rasd | round | toAR }})</td>
-        </tr>
-        <tr>
-          <th>اجمالي صافي الايراد </th>
-          <td>({{ capital_sums.sum_net_income_no_diff | round | toAR }})</td>
-        </tr>
-        <tr>
-          <th>{{'sum_capital' | tr_label}}</th>
-          <td>{{ capital_sums.sum_capital | round | toAR }}</td>
-        </tr>
-      </table>
-      <hr>
-    </div>
   <section class="inout-cashflow">
     <h2>
       {{'menu_collecting'| tr_label}} اليوم

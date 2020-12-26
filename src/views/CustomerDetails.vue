@@ -48,7 +48,7 @@
     حركة نقدية : تحصيل / امانة 
   </button> 
 
-      <div v-if=" false && shader_configs['shader_name'] == 'amn1'">
+      <div >
         <div class="m-2" >
           <h4>عدد {{packaging.count}} عداية في حساب المخزن بمبلغ {{packaging.amount}}</h4>
         </div>

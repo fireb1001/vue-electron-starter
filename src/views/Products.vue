@@ -40,7 +40,7 @@
       </div>
 
 
-      <div class="form-group row" v-if="app_config.shader_name == 'amn1'">
+      <div class="form-group row" >
         <label  class="col-sm-2">  مشال الصنف</label>
         <div class="col-sm-10">
           <input v-model="product_form.cust_mashal" class="form-control "  placeholder="مشال الصنف">
