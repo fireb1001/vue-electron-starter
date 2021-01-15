@@ -51,7 +51,7 @@ hide-header hide-footer hide-header-close hide-backdrop>
 
   <div class="col-7"  >
     <h3 > {{'kashf_cust' | tr_label}} </h3>
-    <h2 class="text-center" v-if="daily_out_trans[0] && app_config.shader_name == 'magdy'"> حساب سابق : {{ daily_out_trans[0].debt_was | toAR }}</h2>
+    <h2 class="text-center" v-if="daily_out_trans[0]"> حساب سابق : {{ daily_out_trans[0].debt_was | toAR }}</h2>
   </div>
 </div>
 <img v-if="! kashf_header.includes('.png')"
