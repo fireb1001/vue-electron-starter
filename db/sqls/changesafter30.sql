@@ -1,7 +1,5 @@
 -- https://drive.google.com/file/d/1fcfQOvo-kKO0PPBlR5lgv0FAi27lSEWO/view?usp=sharing
 
-
-
 -- 1.61
 -- for amn1
 -- change show_totals add recp_diff
@@ -20,17 +18,18 @@ alter TABLE packaging add COLUMN cashflow_id INTEGER;
 alter TABLE packaging add COLUMN out_scope INTEGER;
 
 
-INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags", "cust_form") 
-VALUES ('init_pkg', 'عدايات لدي التاجر', 'default', '+', '', 'customer_trans', '', '', '', 'CUST_FORM', '1');
+INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "cust_form") 
+VALUES ('init_pkg', 'عدايات لدي التاجر', 'default', '+', '', 'customer_trans', '', '', '1');
 
-INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags") 
-VALUES ('pkg_destruct', 'اهلاك عدايات', 'default', '-', '', 'packaging', 'pkg_destruct,anti_pkg_destruct', '', '', '');
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans") 
+VALUES ('pkg_destruct', 'اهلاك عدايات', 'default', '-', '', 'packaging', 'pkg_destruct,anti_pkg_destruct', '');
 
-INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags") 
-VALUES ('pkg_destruct', 'اهلاك عدايات', 'default', '-', '1', 'cashflow', 'ex', '', '', 'DEDUCT');
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans") 
+VALUES ('anti_pkg_destruct', 'تعويض اهلاك عدايات', 'default', '+', '', 'cashflow', '', '');
 
-INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans", "sum_rahn", "flags") 
-VALUES ('anti_pkg_destruct', 'تعويض اهلاك عدايات', 'default', '+', '', 'cashflow', '', '', '', '');
+
+INSERT INTO "trans_types" ("name", "ar_name", "shader_name", "sum", "optional", "category", "map_cashflow", "map_customer_trans") 
+VALUES ('pkg_destruct', 'اهلاك عدايات', 'default', '-', '1', 'cashflow', 'ex', '');
 
 -- 1.56
 
@@ -54,12 +53,6 @@ CREATE TABLE "packaging" (
 );
 
 -- DELETE cols from trans_types
-
-alter TABLE incomings add COLUMN pkg_dismiss INTEGER;
-alter TABLE trans_types add COLUMN cust_form INTEGER;
-alter TABLE trans_types add COLUMN map_packaging TEXT;
-
-update trans_types set cust_form = 1 where flags = 'CUST_FORM';
 
 PRAGMA foreign_keys = 0;
 
@@ -113,21 +106,28 @@ DROP TABLE sqlitestudio_temp_table;
 
 PRAGMA foreign_keys = 1;
 
+-- Alter some tables
+
+alter TABLE incomings add COLUMN pkg_dismiss INTEGER;
+alter TABLE trans_types add COLUMN cust_form INTEGER;
+alter TABLE trans_types add COLUMN map_packaging TEXT;
+
+update trans_types set cust_form = 1 where flags = 'CUST_FORM';
+
 -- 1.55
 
 
 INSERT INTO trans_types ("name", "ar_name", "shader_name", "sum", "optional", "category") 
 VALUES ('anti_cust_discount', 'تعويض خصم التاجر', 'default', '+', '', 'cashflow');
 
-ALTER TABLE customers add side_acc REAL;
 -- R 1.42
 -- ## Add alwasit logo 
+ALTER TABLE customers add side_acc REAL;
 ALTER TABLE suppliers add side_acc REAL;
 -- R 1.41 
--- ## add till_val instead of dome_till
+-- ## add till_val instead of demo_till
 -- validate till_val using 
 -- "mmn1".split('').map(x => ! isNaN(x) ? + x: x.charCodeAt(0)).reduce((a,b) => a+b);
-
 
 -- 1.45 
 -- ## update views
