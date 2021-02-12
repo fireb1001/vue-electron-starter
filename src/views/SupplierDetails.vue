@@ -160,7 +160,7 @@
         
         <button 
         v-b-toggle.collapse_closer
-        v-if="shader_configs['shader_name'] == 'nada'"
+
         class=" btn btn-danger m-2" >
           <span class="fa fa-table"></span> &nbsp; 
         تصفية سنوية
