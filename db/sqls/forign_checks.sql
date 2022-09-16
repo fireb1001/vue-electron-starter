@@ -71,8 +71,10 @@ DROP TABLE sqlitestudio_temp_table;
 
 PRAGMA foreign_keys = 1;
 
--------------- 
-
+-------------
+---------------
+---------------
+-- SET NULL for outgoings proplem
 PRAGMA foreign_keys = 0;
 
 CREATE TABLE sqlitestudio_temp_table AS SELECT *
@@ -85,7 +87,7 @@ CREATE TABLE outgoings (
     day             TEXT    NOT NULL,
     supplier_id     INTEGER NOT NULL,
     product_id      INTEGER NOT NULL,
-    customer_id     INTEGER REFERENCES customers (id) ON DELETE CASCADE,
+    customer_id     INTEGER REFERENCES customers (id) ON DELETE SET NULL,
     count           INTEGER NOT NULL,
     kg_price        REAL    NOT NULL,
     weight          REAL    NOT NULL,
