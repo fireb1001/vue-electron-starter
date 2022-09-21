@@ -5,12 +5,12 @@ delete from outgoings;
 delete from receipts;
 delete from receipt_details;
 delete from supplier_trans;
+delete from customer_trans;
 delete from customers_daily;
 delete from cashflow;
 delete from dealer_trans;
 delete from packaging;
 
-delete from customer_trans;
 	
 delete from dealers;
 delete from customers;
