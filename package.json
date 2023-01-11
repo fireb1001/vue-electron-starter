@@ -17,7 +17,7 @@
     "bookshelf-soft-delete": "^5.0.0",
     "bootstrap-vue": "^2.3.0",
     "electron-log": "^3.0.7",
-    "knex": "^0.19.1",
+    "knex": "^2.4.0",
     "luxon": "^1.22.0",
     "moment": "^2.24.0",
     "mssql": "^5.1.0",
